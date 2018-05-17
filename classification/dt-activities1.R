@@ -31,10 +31,17 @@ path.rpart(model1, nodes = c(3,7))
 unlist(model1, use.names = FALSE)[1:5]
 #https://stackoverflow.com/questions/11831794/testing-rules-generated-by-rpart-package
 
+model1$splits
+model1$splits[model1$splits[,'ncat']==5,]
+??splits
+
 library(rpart.utils)
 rpart.lists(model1)
 rpart.rules.table(model1)
 rpart.subrules.table(model1)
 
 library(rpart.plot)
-rpart.plot(model1)
+rpart.plot(model1, nn=TRUE)
+
+post(model1, file='')
+#http://www.mayo.edu/research/documents/rpartminipdf/doc-10027257

@@ -23,6 +23,7 @@ kmodel1 = kmeans(student2, 2)
 kmodel1$cluster
 kmodel1$centers
 
+
 student2[kmodel1$cluster ==1,]
 student2[kmodel1$cluster ==2,]  # Tutorial Group
 
