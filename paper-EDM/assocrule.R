@@ -5,9 +5,7 @@ library(gsheet)
 library(arules)
 library(arulesViz)
 
-url = 'https://docs.google.com/spreadsheets/d/1fHrF7ia4sBrYbCFRdZQa26eGKZ_7O9t18h7PdN6GY2c/edit#gid=2063933998'
 
-data1 = as.data.frame(gsheet2tbl(url))
 #or load the data from csv
 data1 = read.csv(file.choose())  #elective1.csv
 head(data1)
@@ -28,14 +26,13 @@ inspect(data3)
 #want to know frequency of items, I can plot as below;
 itemFrequencyPlot(data3, type='absolute')
 #Making association rules ####
-#Now make association rules.
 options(digits=2)
 rules1 <- apriori(data3, parameter = list(maxlen=3, support=0.04, confidence=0.6, ext=TRUE))
 
 
 rules1L = sort(rules1, by='lift', decreasing=T)
 inspect(rules1L)
-summary(data3rule.lift)
+
 inspect(sort(subset(rules1L, subset= (support > 0.4))))
 
 #specific rules : rhs=elective6  and lift=1
