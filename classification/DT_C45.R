@@ -6,24 +6,37 @@
 library(RWeka)
 library(caret)
 
+#data generate
+ns=600
+(rollno = 1:ns)
+(acadskill = round(rnorm(n=ns, mean=.5, sd=.1),2))
+(techskill = round(rnorm(n=ns, mean=.6, sd=.1),2))
+(softskill = round(rnorm(n=ns, mean=.4, sd=.1),2))
+(finalresult = sample(x=c(0,1), size=ns, replace=T, prob=c(.4,.6)))
+sapply(list(acadskill, techskill, softskill),range)
+students = data.frame(rollno, acadskill, techskill, softskill, finalresult)
 head(students)
+
 set.seed(1958)  # set a seed to get replicable results
 train1 <- createFolds(students$finalresult, k=10)
-C45Fit1 <- train(finalresult ~., method="J48", data=students, tuneLength = 5,   trControl = trainControl( method="cv", indexOut=train))
+train1
+C45Fit1 <- train(finalresult ~ ., method="J48", data=students[,-1], tuneLength = 5,   trControl = trainControl( method="cv", indexOut=train1))
 C45Fit1
 C45Fit1$finalModel
 
 
 #iris
 set.seed(1958)  # set a seed to get replicable results
-train <- createFolds(iris$Species, k=10)
-C45Fit <- train(Species ~., method="J48", data=iris, tuneLength = 5,   trControl = trainControl( method="cv", indexOut=train))
-C45Fit
-C45Fit$finalModel
+train2 <- createFolds(iris$Species, k=10)
+C45Fit2 <- train(Species ~., method="J48", data=iris, tuneLength = 5,   trControl = trainControl( method="cv", indexOut=train2))
+C45Fit2
+C45Fit2$finalModel
+plot(C45Fit2)
+iris[1:2,]
+predict(object=C45Fit2, newdata = iris[1:2,], type='prob')
 
 #C5.0
-#Quinlan made improvements to C4.5 and called it C5.0. The newer algorithm is faster, requires less memory and gets results similar to C4.5 but with smaller decision trees.
-#The algorithm is availabe in package C50. The printr package is a companion to knitr.
+#Quinlan made improvements to C4.5 and called it C5.0. The newer algorithm is faster, requires less memory and gets results similar to C4.5 but with smaller decision trees.#The algorithm is availabe in package C50. The printr package is a companion to knitr.
 
 library(C50)
 library(printr)
@@ -44,3 +57,4 @@ plot(model)
 #Comparing the splits between the two algorithms we see that C4.5 made 4 splits and got 96% accuracy whereas C5.0 made only 3 splits and got 98% accuracy.
 
 #Note that the seed influenced how the data was split and therefore influenced the result. This is a small data set and therefore more influenced by the test/train split than a larger data set is likely to be.
+
