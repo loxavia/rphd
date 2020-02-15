@@ -149,3 +149,23 @@ sepsis %>%   filter_time_period(interval = ymd(c(20150101, 20150131)), filter_me
 sepsis %>%   filter_time_period(interval = ymd(c(20150101, 20150131)), filter_method = "contained") %>% dotted_chart
 
 sepsis %>%   filter_time_period(interval = ymd(c(20150101, 20150131)), filter_method = "intersecting") %>% dotted_chart
+
+
+
+#Graphs ----
+processmapR::resource_matrix(sepsis) %>% plot 
+processmapR::resource_map(patients)
+processmapR::trace_explorer(patients) 
+
+
+patients %>%  idle_time("resource", units = "days")
+patients %>%   idle_time("resource", units = "days") %>%   plot()
+patients %>%    processing_time("activity") %>%   plot
+#https://www.bupar.net/exploring.html
+
+
+#animation
+#https://www.bupar.net/processanimater.html
+library(processanimateR)
+library(eventdataR)
+animate_process(patients)

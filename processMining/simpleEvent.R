@@ -121,3 +121,21 @@ event3 %>%   filter_activity_frequency(percentage = 0.5, reverse = T) %>%  activ
 event3 %>%  filter_resource_frequency(perc = 0.80) %>% resources()
 
 event3 %>%   filter_trim(start_activities = "A", end_activities =  c("D","F")) %>%   process_map(type = performance(units='days'))
+
+#not working
+event3 %>%  group_by(case, activity) %>%   throughput_time('log') %>%   plot 
+event3 %>%  group_by(case, activity) %>% throughput_time('log')
+
+processmonitR::activity_dashboard(event3) 
+processmonitR::resource_dashboard(event3) 
+processmonitR::rework_dashboard(event3)
+processmonitR::performance_dashboard(event3) 
+processmapR::process_map(event3) 
+processmapR::precedence_matrix(event3) %>% plot
+processmapR::trace_explorer(event3) 
+processmapR::idotted_chart(event3) 
+processmapR::resource_map(event3) 
+processmapR::resource_matrix(event3) %>% plot 
+
+
+animate_process(event3)
