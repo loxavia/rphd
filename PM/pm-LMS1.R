@@ -1,6 +1,6 @@
 #PM - LMS data
 
-link = "https://docs.google.com/spreadsheets/d/1Rv-8pDWMeonmjn7LCZh55MJtIh0XG5vHX-mIZpcGf1c/edit#gid=1807112403"
+link = "https://docs.google.com/spreadsheets/d/1Rv-8pDWMeonmjn7LCZh55MJtIh0XG5vHX-mIZpcGf1c/edit#gid=513508550"
 library(gsheet)
 library(processanimateR)
 library(eventdataR)
@@ -12,11 +12,12 @@ library(dplyr)
 df = as.data.frame(gsheet2tbl(link))
 data = df
 names(data)
-data$Time
+head(df)
+data$Time  #check data format
 textdate = "14 February 2020, 4:28 PM"
 strptime(textdate, format ='%d %B %Y, %I:%M %p')
-
-data$Time = as.POSIXlt(data$Time, format ='%d %B %Y, %I:%M %p')
+as.POSIXct("16/02/20, 14:57", format='%d/%m/%y, %H:%M')
+data$Time = as.POSIXct(data$Time, format='%d/%m/%y, %H:%M')
 data$Time
 str(data)
 names(data)
@@ -36,6 +37,11 @@ events %>%  process_map()
 
 
 processmapR::process_map(events)
+animate_process(events)
+lm2 <- animate_process(events)
+
+htmlwidgets::saveWidget(lm2,file='E:/lms2.html')
+
 
 
 #-----lms3-----
@@ -60,3 +66,6 @@ events <- bupaR::simple_eventlog(eventlog = data,   case_id = 'user',  activity_
 events
 processmapR::process_map(events)
 animate_process(events)
+
+m2 <- animate_process(events)
+htmlwidgets::saveWidget(m2,file='lms.html')
