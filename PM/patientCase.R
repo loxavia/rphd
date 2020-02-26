@@ -160,7 +160,7 @@ processmapR::trace_explorer(patients)
 
 patients %>%  idle_time("resource", units = "days")
 patients %>%   idle_time("resource", units = "days") %>%   plot()
-patients %>%    processing_time("activity") %>%   plot
+patients %>%    processing_time("activity") %>%   plot()
 #https://www.bupar.net/exploring.html
 
 
