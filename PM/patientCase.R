@@ -1,4 +1,5 @@
 #patient Case
+head(patients,1) %>% as.data.frame()
 
 patients %>%   filter_activity(c("X-Ray", "Blood test")) %>%   activities
 
