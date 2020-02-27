@@ -12,7 +12,7 @@ head(df)
 df
 names(df)
 str(df)
-event <- bupaR::eventlog(eventlog=df, case_id='case', activity_id ='activity', activity_instance_id= 'activity_instance', lifecycle_id='lifecycle', timestamp = 'timestamp', resource_id ='resource')
+event <- bupaR::eventlog(eventlog=df, case_id='case', activity_id ='activity', activity_instance_id= 'act_inst', lifecycle_id='lifecycle', timestamp = 'time', resource_id ='resource')
 event
 
 event %>% process_map()
