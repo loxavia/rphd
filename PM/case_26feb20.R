@@ -2,8 +2,10 @@
 
 library(gsheet)
 library(bupaR)
+library(dplyr)
 library(edeaR)
 library(processmapR)
+library(processanimateR)
 
 link='https://docs.google.com/spreadsheets/d/139d4RD4wnf4Qvp2mg2DCMWCOOemmiQM1NA9K7vn5Ak0/edit#gid=1506524608'
 
