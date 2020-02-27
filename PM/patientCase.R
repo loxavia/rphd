@@ -51,8 +51,7 @@ patients %>%  filter_throughput_time(percentage = 0.5) %>% throughput_time(units
 
 patients %>% filter_processing_time(interval = c(50, 100), units = "hours") %>%  processing_time(units = "hours")
 
-patients %>%  filter_processing_time(percentage = 0.5) %>%
-  processing_time(units = "hours")
+patients %>%  filter_processing_time(percentage = 0.5) %>%  processing_time(units = "hours")
 
 
 #Trace length-----

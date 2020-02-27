@@ -74,3 +74,17 @@ event2 %>%  filter_processing_time(percentage = .5)  %>% processing_time(units =
 event2 %>%  filter_trace_length(interval = c(1, 3)) %>% process_map()
 event2 %>%  filter_trace_length(interval = c(1, 3)) %>% trace_length(units = "hours")
 event2 %>%  filter_trace_length(percentage = 1) %>%  trace_length()
+event2 %>%   filter_time_period(interval = ymd(c(20170609, 20170630)), filter_method = "start") %>% n_cases
+
+n_distinct(event2$activity)
+activity_labels(event2)
+activities(event2)
+processing_time(event2, unit='hours')
+processing_time(event2, level="log", units="days")
+?processing_time
+processing_time(event2, level="case", units="hours")
+processing_time(event2, level="resource", units="hours")
+processing_time(event2, level="activity", units="hours")
+processing_time(event2, level="trace", units="hours")
+processing_time(event2, level="resource-activity", units="hours")
+processing_time(event2, level="activity", units="hours", append_column = T)
