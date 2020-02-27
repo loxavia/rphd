@@ -30,7 +30,7 @@ animate_process(event, duration=10)
 #assigning activity_instance
 head(df)
 df1 = df
-df2 <- df1 %>% group_by(activity, case) %>% summarise(count=n()) %>% tibble::rowid_to_column("activity_instance2") %>% select(-c(count)) %>% merge(df1)
+df2 <- df1 %>% group_by(case,activity) %>% summarise(count=n()) %>% tibble::rowid_to_column("act_inst") %>% select(-c(count)) %>% merge(df1)
 df2
 
 event %>% process_map(type = frequency("absolute"))
@@ -44,10 +44,12 @@ head(newdf)
 newdf
 names(newdf)
 str(newdf)
-newdf2 <- newdf %>% group_by(activity, case) %>% summarise(count=n()) %>% tibble::rowid_to_column("activity_instance") %>% select(-c(count)) %>% merge(newdf)
+newdf %>% arrange(time) %>% group_by(activity, case) %>% summarise(count=n(), ftime = first(time), ltime=last(time)) %>% arrange(ftime) %>% tibble::rowid_to_column("act_inst") %>% select(-c(count)) %>% merge(newdf) %>% arrange(act_inst)
+
+newdf2 <- newdf %>% arrange(time) %>% group_by(activity, case) %>% summarise(count=n(), ftime = first(time), ltime=last(time)) %>% arrange(ftime) %>% tibble::rowid_to_column("act_inst") %>% select(-c(count)) %>% merge(newdf) %>% arrange(act_inst) %>% select(time, case, activity, act_inst, lifecycle, resource)
 newdf2
 
-event2 <- bupaR::eventlog(eventlog=newdf2, case_id='case', activity_id ='activity', activity_instance_id= 'activity_instance', lifecycle_id='lifecycle', timestamp = 'timestamp', resource_id ='resource')
+event2 <- bupaR::eventlog(eventlog=newdf2, case_id='case', activity_id ='activity', activity_instance_id= 'act_inst', lifecycle_id='lifecycle', timestamp = 'time', resource_id ='resource')
 event2
 
 event2 %>% process_map()
@@ -63,3 +65,12 @@ animate_process(event2, duration=10)
 
 event2 %>% process_map(type = frequency("absolute"))
 event2 %>% process_map(type = frequency("relative"))
+
+#activities during full time
+event2 %>%  filter_processing_time(percentage = 1)
+#activities which took 50% of time
+event2 %>%  filter_processing_time(percentage = .5)  %>% processing_time(units = "hours")
+#case where trace length between 1 to 3 activities
+event2 %>%  filter_trace_length(interval = c(1, 3)) %>% process_map()
+event2 %>%  filter_trace_length(interval = c(1, 3)) %>% trace_length(units = "hours")
+event2 %>%  filter_trace_length(percentage = 1) %>%  trace_length()
