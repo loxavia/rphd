@@ -90,3 +90,42 @@ processing_time(event2, level="activity", units="hours")
 processing_time(event2, level="trace", units="hours")
 processing_time(event2, level="resource-activity", units="hours")
 processing_time(event2, level="activity", units="hours", append_column = T)
+
+
+
+#28 Feb 20-----
+event2
+names(event2)
+?distinct
+event2 %>% select(case, activity) %>% head()
+distinct(event2, case)
+event2 %>% dplyr::distinct(case, activity) %>%  select(activity) %>%  dplyr::group_by_all %>%   summarize(metric=n())
+
+#Activity - in how many cases
+event2 %>% as.data.frame() %>% distinct(case, activity)  %>% select(activity) %>% group_by_all() %>% summarise(metric = n())
+#Activity used in each case how many times
+event2 %>% select(case, activity, time) %>%  group_by(case,activity) %>% summarize(metric=n())
+#max time an activity was used
+event2 %>% select(case, activity, time) %>%  group_by(case,activity) %>% summarize(metric=n()) %>% group_by(activity) %>% summarise(metric = max(metric))
+#duration
+duration(event2)
+bupaR::durations(event2)
+?bupaR
+#activities reoccurred
+number_of_repetitions(event2, level="activity", type="all")
+#Which activities reoccurred consecutively in a case where the same resource repeated the activities?
+number_of_repetitions(event2, level="activity", type="repeat")
+#Which cases had activities duplicated? The duplicated activities were interrupted by other activities and these duplicated activities were redone by a different resource.
+number_of_selfloops(event2, level="case", type = "redo")
+
+
+#for each day, which resource was used how many times
+event2 %>% as.data.frame() %>% mutate(Date= as.Date(time)) %>% mutate("ID_day" = group_indices_(., .dots = c("resource","Date"))) %>% group_by(ID_day) %>% arrange(ID_day, time) %>% select(resource, ID_day, case) %>% group_by(case, ID_day, resource) %>% summarise(metric = n())
+#similar for activity
+event2 %>% as.data.frame() %>% mutate(Date= as.Date(time)) %>% mutate("ID_day" = group_indices_(., .dots = c("activity","Date"))) %>% group_by(ID_day) %>% arrange(ID_day, time) %>% select(activity, ID_day, case) %>% group_by(case, ID_day, activity) %>% summarise(metric = n())
+
+#count of each resource
+event2 %>% as.data.frame() %>% add_count(resource)
+event2 %>% as.data.frame() %>% add_count(activity)
+event2 %>% as.data.frame() %>% group_by(case) %>% add_count(activity) %>% select(case, activity, time, n)
+
