@@ -177,8 +177,6 @@ events %>%   process_map(type = frequency("relative_case"), color_scale = "Purp
 events %>%  process_map(performance(median, "days"))
 events %>%  process_map(performance(mean, "hours"))
 events %>%  process_map(type_nodes = frequency("relative_case"),    type_edges = performance(mean))
-=======
   
-  m2 <- animate_process(events)
+m2 <- animate_process(events)
 htmlwidgets::saveWidget(m2,file='lms.html')
->>>>>>> c00144bedea57ba9b77195924f05de549aa2621d
