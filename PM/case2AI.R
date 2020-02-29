@@ -24,9 +24,9 @@ events3a %>% process_map()
 df3b <- df3 %>% group_by(case, activity) %>% summarise(count=n()) %>% tibble::rowid_to_column( "act_inst") %>% select(-c(count)) %>% merge(df3)
 
 #there is no lifecycle
-df3c <- df3b %>% mutate(lifecycle = NA)
+df3b1 <- df3b %>% mutate(lifecycle = NA)
 
-events3b <- bupaR::eventlog(eventlog=df3c, case_id='case', activity_id ='activity', activity_instance_id= 'act_inst', lifecycle_id='lifecycle', timestamp = 'timestamp', resource_id ='resource')
+events3b <- bupaR::eventlog(eventlog=df3b1, case_id='case', activity_id ='activity', activity_instance_id= 'act_inst', lifecycle_id='lifecycle', timestamp = 'timestamp', resource_id ='resource')
 #warning - one resource alloted to more than 1 activity. I can happen
 
 events3b %>% process_map()
@@ -97,3 +97,66 @@ events3b %>% throughput_time()
 
 events3b %>% 
 ?renderer_graphviz
+
+events3b %>% group_by_resource() %>% n_cases()
+events3b %>% group_by_case() %>% n_cases()
+events3b %>% group_by(status) %>%  n_cases()
+#group_by_case - group by cases
+events3b %>% group_by_activity()  %>% n_cases() # - group by activity types
+events3b %>% group_by_resource()  %>% n_cases()
+#group_by_resource - group by resources
+
+events3b %>% group_by_activity_resource()  %>% n_cases() #- group by activity resource pair % becos instance not calc correctly
+events3b %>% group_by_activity_instance()  %>% n_cases()
+#group_by_activity_instance - group by activity instances.
+
+attributes(events3b)
+events3b %>% select(activity) %>% group_by_activity() %>% throughput_time(units='hours')
+?group_by_activity
+#from first 5 events construct trace explorer
+events3b %>% group_by_case() %>%  first_n(5) %>% trace_explorer(coverage = 0.95)
+events3b %>% group_by_case() %>%  first_n(10) %>% trace_explorer(coverage = 0.95)
+
+
+#group by activity - resource
+#activity instance
+df3c <- df3 %>% group_by(case, activity, resource) %>% summarise(count=n()) %>% tibble::rowid_to_column( "act_inst") %>% select(-c(count)) %>% merge(df3)
+
+#there is no lifecycle
+df3c1 <- df3c %>% mutate(lifecycle = NA)
+
+events3c <- bupaR::eventlog(eventlog=df3c1, case_id='case', activity_id ='activity', activity_instance_id= 'act_inst', lifecycle_id='lifecycle', timestamp = 'timestamp', resource_id ='resource')
+
+#---
+events3b %>% group_by_activity_instance() %>% n_cases()
+events3c %>% group_by_activity_resource()  %>% n_cases() #- group by activity resource pair % becos instance not calc correctly
+
+events3c %>% resource_map()
+events3c %>% resource_matrix()
+events3c %>% process_matrix()
+events3c %>% precedence_matrix()
+events3c %>% dotted_chart(sort='start')
+events3c %>% dotted_chart(sort='duration')
+
+?dotted_chart
+
+processing_time(events3c, level="case", units="hours")
+processing_time(events3c, level="resource", units="hours")
+processing_time(events3c, level="activity", units="hours")
+processing_time(events3c, level="trace", units="hours")
+processing_time(events3c, level="resource-activity", units="hours")
+processing_time(events3c, level="activity", units="hours", append_column = T)
+
+events3c %>% as.data.frame() %>% add_count(resource)
+events3c %>% process_map(type = frequency("absolute"))
+events3c %>% process_map(type = frequency("relative"))
+
+animate_process(events3c, legend=T, mode='absolute', duration=10)
+animate_process(events3c, legend=T, mode='relative', duration=10)
+animate_process(events3c, legend=T, mode='relative', duration=10,mapping = token_aes(color = token_scale("red"), size = token_scale(10)))
+#color as per gender----
+animate_process(events3c,  legend = "color",   mapping = token_aes(color = token_scale("case", scale='ordinal', range = c('red','blue'))), duration=10)
+
+animate_process(events3c,  legend = "color",   mapping = token_aes(color = token_scale(attribute="case", scale='ordinal', range = c('red','blue')), size=token_scale(12), opacity = token_scale('0.4')), duration=10)
+
+animate_process(events3c, legend='size', mapping = token_aes(shape = "rect"), duration=10)
