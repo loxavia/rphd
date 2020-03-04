@@ -25,8 +25,10 @@ head(e1)
 (rollno = paste('S',1:50,sep='-'))
 (sname = paste('Student-',1:50, sep=''))
 (gender = sample(c('M','F'), size=50, replace=T, prob=c(.7,.3)))
-(finalMarks = trunc(runif(50,min=60,max=500)))
-(students = data.frame(rollno, sname, gender, finalMarks, stringsAsFactors = F))
+(finalMarks = trunc(runif(50,min=200,max=500)))
+(grades = sample(c('A','B','C'), size=50, replace=T, prob=c(.3,.3,.4)))
+
+(students = data.frame(rollno, sname, gender, finalMarks, grades, stringsAsFactors = F))
 head(students)
 names(students) ; names(e1)
 (e2 <- merge(x=students, y=e1, all.y=T ))
@@ -52,29 +54,46 @@ events1 %>% activity_frequency(level='activity') %>% plot
 processmapR::process_map(events1)
 
 #Animate Process-----
-ap1 <- animate_process(events1)
-ap1
-animate_process(events1, legend=T, mode='absolute', duration=10)
-animate_process(events1, legend=T, mode='relative', duration=10)
-animate_process(events1, legend=T, mode='relative', duration=10,mapping = token_aes(color = token_scale("red"), size = token_scale(10)))
+absam1 <- animate_process(events1, duration=10, mode='absolute', mapping = token_aes(color=token_scale('red')))
+absam1
+
+relam1 <- animate_process(events1, duration=10, mode='relative', mapping = token_aes(color=token_scale('red')))
+relam1
+
+#Color and size
+animate_process(events1, legend=T, mode='absolute', duration=10, mapping = token_aes(color = token_scale("red"), size = token_scale(10)))
+        
 names(events1)
 str(events1)
 events1$gender = factor(events1$gender)
+events1$grades = factor(events1$grades)
+
 #color as per gender----
 animate_process(events1,  legend = "color",   mapping = token_aes(color = token_scale("gender", scale='ordinal', range = c('red','blue'))), duration=10)
 
-#color as per gender as size as per marks ----
+#color as per grades----
+animate_process(events1,  legend = "color",   mapping = token_aes(color = token_scale("grades", scale='ordinal', range = c('green','yellow','red'))), duration=10)
+
+g=c('A','B','C') ; gc =c('green','yellow','red')
+i=3
+events1 %>% filter(grades == g[i]) %>% animate_process(legend = "color", mode='relative', mapping = token_aes(color = token_scale(gc[i]), size = token_scale(10)), duration=10, initial_state = 'paused', jitter=2, epsilon_time = 1)
+
+
+#color as per gender using opacity ----
 animate_process(events1,  legend = "color",   mapping = token_aes(color = token_scale(attribute="gender", scale='ordinal', range = c('red','blue')), size=token_scale(12), opacity = token_scale('0.4')), duration=10)
 
-animate_process(events1,  legend = "color",   mapping = token_aes(color = token_scale(attribute="finalmarks", scale='quantize', range = c('red','green','blue')), size=token_scale(12), opacity = token_scale('0.4')), duration=10)
+str(events1$finalMarks)
 
+animate_process(events1,  legend = "size",   mapping = token_aes(size = token_scale(attribute="finalmarks", scale='quantize', range=1:3), opacity = token_scale('0.4')), duration=10)
 
-animate_process(events1,  legend = "size",   mapping = token_aes(size = token_scale(12), shape='rect'), duration=10)
-animate_process(events1, legend='size', mapping = token_aes(size = token_scale(15), shape = "rect"), duration=10)
+animate_process(events1,  legend = "color",   mapping = token_aes(color = token_scale(attribute="finalmarks", scale='quantize', range=c('red','yellow'))), duration=10)
 
-animate_process(events1,  mapping = token_aes(color = token_scale(attribute='gender', range=c('red','blue'))), duration=10, legend=T)
+str(patients$employee)
+animate_process(patients, mode = "relative", jitter = 10, legend = "color",   mapping = token_aes(color = token_scale("employee", scale = "ordinal",   range = RColorBrewer::brewer.pal(7, "Paired"))))
 
-animate_process(events1, legend=T, mode='relative', duration=10,  mapping = token_aes(color = token_scale('marks'), scale = 'linear'))
+animate_process(events1, legend='size', mapping = token_aes(size = token_scale(10), shape = "rect"), duration=10)
+
+animate_process(events1, legend=T, mode='relative', duration=10,  mapping = token_aes(color = token_scale('finalmarks'), scale = 'linear'))
 
 htmlwidgets::saveWidget(ap1, file = "ap1.html")
 
@@ -253,3 +272,32 @@ case_list(events1)
 number_of_repetitions(events1, level="activity", type="all")
 number_of_repetitions(events1, level="activity", type="repeat")
 number_of_selfloops(events1, level="case", type = "redo")
+
+
+
+
+#----egs------
+summary(traffic_fines)
+range(traffic_fines$amount, na.rm=T)
+str(traffic_fines$amount)
+animate_process(edeaR::filter_trace_frequency(bupaR::sample_n(traffic_fines,1000),percentage=0.5),   legend = "color", mode = "relative",  mapping = token_aes(color = token_scale("amount", scale = "linear",  range = c("yellow","red"))), duration=20)
+
+range(events1$finalMarks)
+mapping(traffic_fines)
+summary(traffic_fines)
+summary(events1)
+animate_process(edeaR::filter_trace_frequency(bupaR::sample_n(events1,10),percentage=0.5),   legend = "color", mode = "relative",  mapping = token_aes(color = token_scale("finalmarks", scale = "linear",  range = c("yellow","red"))), duration=20)
+
+rn <- events1 %>% filter(finalMarks > 400) %>% pull(rollno)
+rnlist <- unique(rn)
+rnlength <- length(rnlist)
+events1 %>% filter(rollno %in% rnlist) %>%  animate_process(legend = "color", mode = "relative",  mapping = token_aes(color = token_scale("rollno", scale = "ordinal", range = RColorBrewer::brewer.pal(rnlength, "Paired"))), duration=20)
+
+#range = RColorBrewer::brewer.pal(rnlength, "Paired"))))
+
+
+
+animate_process(events1,legend = "color", mode = "relative",  mapping = token_aes(color = token_scale("finalmarks", scale = "linear",  range = c("yellow","red"))), duration=10)
+str(events1$finalMarks)
+animate_process(traffic_fines[1:100,],legend = "color", mode = "relative",  mapping = token_aes(color = token_scale("finalamount", scale = "linear",  range = c("yellow","red"))), duration=10)
+animate_process(edeaR::filter_trace_frequency(bupaR::sample_n(events1,25),percentage=1),   legend = "color", mode = "relative",  mapping = token_aes(color = token_scale("finalmarks", scale = "linear",  range = c("yellow","red"))), duration=10)
