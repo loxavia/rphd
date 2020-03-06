@@ -1,20 +1,34 @@
 #patient Case
-head(patients,1) %>% as.data.frame()
 
-patients %>%   filter_activity(c("X-Ray", "Blood test")) %>%   activities
+#libraries
+library(bupaR)
+#library(dplyr)
+library(eventdataR)
+library(edeaR)
+library(processanimateR)
+library(processmapR)
+library(processmonitR)
+library(lubridate)
+
+
+head(patients,5) %>% as.data.frame()
+patients
+patients %>% summary()
+patients %>% n_activities()
+n_activities(patients)
+patients %>%   filter_activity(c("X-Ray", "Blood test")) %>%   activities()
 
 patients %>% activity_frequency(level = "activity")
 
 patients %>% activity_frequency(level = "activity") %>% plot() 
 
-patients %>% filter_activity_frequency(percentile_cut_off = 0.8)
+patients %>% filter_activity_frequency(percentage = 0.8)
 patients %>% filter_activity_presence(c("Registration","Check-out"), method = "all")
 
-patients %>% filter_time_period(  start_point = ymd(20170101),
-                                  end_point = ymd(20170131),  filter_method = "start", reverse = T)
+patients %>% filter_time_period(  interval(ymd(20170101), ymd(20170131)),  filter_method = "start", reverse = T)
 patients %>% filter_time_period(interval = interval(ymd(20170101),ymd(20170131)),  filter_method = "start", reverse = T)
 patients %>%   filter_activity_frequency(interval = c(300,500)) %>%
-  activities
+  activities()
 patients %>%   filter_resource(c("r1","r4")) %>%  resource_frequency("resource")
 patients %>%   filter_resource_frequency(perc = 0.80) %>%   resources()
 
@@ -39,7 +53,7 @@ patients %>%  filter_trim(start_activities = "Registration", end_activities =  c
 #Absolute: specific a throughput time interval
 #Relative: specific a percentage target
 #For instance, we can filter cases with a throughput time between 50 and 100 hours. Notice that setting the time unit argument appropriately is important in this case.
-patients %>%   filter_throughput_time(interval = c(50, 100), units = "hours") %>%  throughput_time(units = "hours")
+patients %>%   filter_throughput_time(interval = c(50, 100), units = "hours") %>%  throughput_time (units = c("days"))
 
 #Alternatively, we can filter the 50% cases with the lowest throughput time.
 
@@ -159,8 +173,8 @@ processmapR::trace_explorer(patients)
 
 
 patients %>%  idle_time("resource", units = "days")
-patients %>%   idle_time("resource", units = "days") %>%   plot()
-patients %>%    processing_time("activity") %>%   plot()
+patients %>%  idle_time("resource", units = "days") %>%   plot()
+patients %>%  processing_time("activity") %>%   plot()
 #https://www.bupar.net/exploring.html
 
 
