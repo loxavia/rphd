@@ -3,9 +3,17 @@ PM Text File
 
 #libraries
 library(bupaR)
+#Imports bupaR,dplyr,XML, xml2,data.table, ggplot2, ggthemes, glue,tibble, shiny, miniUI, tidyr, shinyTime, lubridate, purrr
+
 #library(dplyr)
 library(eventdataR)
 library(edeaR)
 library(processanimateR)
 library(processmapR)
 library(processmonitR)
+
+
+easypackages::libraries("plyr", "psych", "tm") #load
+easypackages::packages("plyr", "psych", "tm")  #install
+
+https://rdrr.io/a/github/gertjanssenswillen/edeaR/src/R/activity_presence.R

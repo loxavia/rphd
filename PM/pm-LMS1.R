@@ -1,13 +1,7 @@
 #PM - LMS data
 
 link = "https://docs.google.com/spreadsheets/d/1Rv-8pDWMeonmjn7LCZh55MJtIh0XG5vHX-mIZpcGf1c/edit#gid=513508550"
-library(gsheet)
-library(processanimateR)
-library(eventdataR)
-#library(plyr)
-#library(tidyverse)
-library(bupaR)
-library(dplyr)
+pacman::p_load(gsheet, bupaR, dplyr, edeaR, processmapR, processanimateR, DiagrammeR,lubridate) 
 
 df = as.data.frame(gsheet2tbl(link))
 data = df
@@ -67,5 +61,5 @@ events
 processmapR::process_map(events)
 animate_process(events)
 
-m2 <- animate_process(events)
+m2 <- animate_process(events, sec=frequency('relative'))
 htmlwidgets::saveWidget(m2,file='lms.html')

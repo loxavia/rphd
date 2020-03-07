@@ -1,12 +1,6 @@
 
 #Installation
-install.packages("bupaR")
-install.packages("edeaR")
-install.packages("eventdataR")
-install.packages("processmapR")
-install.packages("processmonitR")
-install.packages("xesreadR")
-install.packages("petrinetR")
+pacman::p_load(gsheet, bupaR, dplyr, edeaR, processmapR, processanimateR, DiagrammeR) 
 
 
 library(bupaR)

@@ -11,27 +11,21 @@ library(DiagrammeR)
 
 link='https://docs.google.com/spreadsheets/d/1Rv-8pDWMeonmjn7LCZh55MJtIh0XG5vHX-mIZpcGf1c/edit#gid=792991636'
 
-df = as.data.frame(gsheet2tbl(link))
-head(df)
-df
-names(df)
-str(df)
+df1 = as.data.frame(gsheet2tbl(link))
+head(df1)
+df1
+names(df1)
+str(df1)
 events1 <- bupaR::simple_eventlog(eventlog = df, case_id = 'case', activity_id = 'activity', timestamp = 'timestamp')
 events1
 
 events1 %>% process_map()
 events1 %>% process_map(sec=frequency('relative'))
 
-epm1 <- events1 %>% process_map(render=F, sec=frequency('relative'))
-epm1
-export_graph(epm1, 'epm1.png',file_type = 'png')
-
-events1 %>% process_map(render = F) %>%  DiagrammeR::export_graph(file_name = 'E:/PMC/epm1.png', file_type = 'PNG')
-
-
+#Not Working-----
+#events1 %>% process_map(render = F, sec=frequency('relative')) %>%  DiagrammeR::export_graph(file_name = 'epm1.png', file_type = 'PNG', title='Process Chart for Patient')
 
 events1 %>% activities()
-#activity Freq
 events1 %>% activity_frequency()
 events1 %>% end_activities()
 events1 %>% start_activities()
@@ -43,7 +37,6 @@ events1 %>% filter_activity_instance(activity_instances = c(1))
 events1 %>% filter_activity_presence(activities = c('surgery'))
 
 #trace
-?trace_coverage
 events1 %>% trace_coverage(level='case')
 events1 %>% trace_coverage(level='trace')
 events1 %>% trace_coverage(level='log')
@@ -53,9 +46,6 @@ events1 %>% trace_coverage(level='trace') %>% plot()
 events1 %>% trace_length()
 events1 %>% number_of_traces()
 events1 %>% number_of_repetitions()
-?number_of_repetitions
-?number_of_selfloops
-
 events1 %>% number_of_selfloops()
 
 events1 %>% trace_explorer()

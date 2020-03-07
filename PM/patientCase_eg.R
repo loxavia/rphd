@@ -1,15 +1,7 @@
 #patient Case
 
 #libraries
-library(bupaR)
-#library(dplyr)
-library(eventdataR)
-library(edeaR)
-library(processanimateR)
-library(processmapR)
-library(processmonitR)
-library(lubridate)
-
+pacman::p_load(gsheet, bupaR, dplyr, edeaR, processmapR, processanimateR, DiagrammeR, lubridate) 
 
 head(patients,5) %>% as.data.frame()
 patients

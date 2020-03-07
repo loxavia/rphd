@@ -1,13 +1,7 @@
 #simulated LMS data for PM
 
 #libraries
-library(bupaR)
-library(dplyr)
-library(eventdataR)
-library(edeaR)
-library(processanimateR)
-library(processmapR)
-library(processmonitR)
+pacman::p_load(gsheet, bupaR, dplyr, edeaR, processmapR, processanimateR, DiagrammeR,lubridate) 
 
 #create some activities
 (activities = c('Forum', 'PPT', 'Assignment','Quiz', 'Game' ,'Survey'))
@@ -19,7 +13,9 @@ names(e1) <- c('rollno','activity')
 
 #sample dates of month
 e1$timestamp = as.POSIXct(as.Date(paste('2020','2',sample(1:30, size=nrow(e1), replace=T),sep='-')))
+(e1$activityscores = round(rnorm(nrow(e1), mean=60, sd=8)))
 head(e1)
+dim(e1)
 
 #student Profile----
 (rollno = paste('S',1:50,sep='-'))
@@ -32,17 +28,20 @@ head(e1)
 head(students)
 names(students) ; names(e1)
 (e2 <- merge(x=students, y=e1, all.y=T ))
-
+names(e2)
+head(e2)
 #select fraction of rows randomly 
 e3 <- e2 %>% sample_frac(.8)
 
 #create bupaR object -----
-events1 <- bupaR::simple_eventlog(eventlog = e3, case_id = 'rollno', activity_id = 'activity', timestamp = 'timestamp')
+events <- bupaR::simple_eventlog(eventlog = e3, case_id = 'rollno', activity_id = 'activity', timestamp = 'timestamp')
 
-events1
-head(events1)
-str(events1)
-summary(events1)
+events
+head(events)
+str(events)
+summary(events)
+events$rollno
+events1 <- events %>% filter_case(cases = c('S-1','S-2','S-3','S-4','S-5'))
 
 #how many activities----
 activity_frequency(events1)
@@ -51,8 +50,16 @@ events1 %>% activity_frequency(level='activity')
 events1 %>% activity_frequency(level='activity') %>% plot
 
 #Process Map-----
-processmapR::process_map(events1)
+#only 1 at a time
+events1 %>% processmapR::process_map(sec=frequency('absolute'))
+events1 %>% processmapR::process_map(sec=frequency('relative'))
+events1 %>% processmapR::process_map(sec=frequency('absolute-case'))
+events1 %>% processmapR::process_map(sec=frequency('relative-case'))
 
+
+
+#----
+?process_map
 #Animate Process-----
 absam1 <- animate_process(events1, duration=10, mode='absolute', mapping = token_aes(color=token_scale('red')))
 absam1
@@ -281,6 +288,9 @@ summary(traffic_fines)
 range(traffic_fines$amount, na.rm=T)
 str(traffic_fines$amount)
 animate_process(edeaR::filter_trace_frequency(bupaR::sample_n(traffic_fines,1000),percentage=0.5),   legend = "color", mode = "relative",  mapping = token_aes(color = token_scale("amount", scale = "linear",  range = c("yellow","red"))), duration=20)
+
+
+head
 animate_process(edeaR::filter_trace_frequency(bupaR::sample_n(traffic_fines,1000),percentage=0.5),   legend = "color", mode = "relative",  mapping = token_aes(color = token_scale("totalpaymentamount", scale = "linear",  range = c("yellow","red"))), duration=20)
 
 range(events1$finalMarks)
@@ -301,5 +311,7 @@ events1 %>% filter(rollno %in% rnlist) %>%  animate_process(legend = "color", mo
 
 animate_process(events1,legend = "color", mode = "relative",  mapping = token_aes(color = token_scale("finalmarks", scale = "linear",  range = c("yellow","red"))), duration=10)
 str(events1$finalMarks)
+
 animate_process(traffic_fines[1:100,],legend = "color", mode = "relative",  mapping = token_aes(color = token_scale("finalamount", scale = "linear",  range = c("yellow","red"))), duration=10)
+
 animate_process(edeaR::filter_trace_frequency(bupaR::sample_n(events1,25),percentage=1),   legend = "color", mode = "relative",  mapping = token_aes(color = token_scale("finalmarks", scale = "linear",  range = c("yellow","red"))), duration=10)
