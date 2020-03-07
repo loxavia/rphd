@@ -10,99 +10,137 @@ pacman::p_load(gsheet, bupaR, dplyr, edeaR, processmapR, processanimateR, Diagra
 (e1 <- expand.grid(rollno, activities))
 head(e1)
 names(e1) <- c('rollno','activity')
+head(e1)
+e1$status ='complete'
+head(e1)
 
 #sample dates of month
+set.seed(123)
 e1$timestamp = as.POSIXct(as.Date(paste('2020','2',sample(1:30, size=nrow(e1), replace=T),sep='-')))
-(e1$activityscores = round(rnorm(nrow(e1), mean=60, sd=8)))
+
+set.seed(124)
+(e1$actscores = round(rnorm(nrow(e1), mean=60, sd=8)))
 head(e1)
 dim(e1)
 
 #student Profile----
 (rollno = paste('S',1:50,sep='-'))
 (sname = paste('Student-',1:50, sep=''))
-(gender = sample(c('M','F'), size=50, replace=T, prob=c(.7,.3)))
-(finalMarks = trunc(runif(50,min=200,max=500)))
-(grades = sample(c('A','B','C'), size=50, replace=T, prob=c(.3,.3,.4)))
+set.seed(123); (gender = sample(c('M','F'), size=50, replace=T, prob=c(.5,.5))); table(gender)
+set.seed(124); (finalMarks = trunc(runif(50,min=200,max=500)))
+set.seed(125); (grades = sample(c('A','B','C'), size=50, replace=T, prob=c(.3,.3,.4))); table(grades)
 
 (students = data.frame(rollno, sname, gender, finalMarks, grades, stringsAsFactors = F))
 head(students)
+summary(students)
 names(students) ; names(e1)
 (e2 <- merge(x=students, y=e1, all.y=T ))
 names(e2)
 head(e2)
+e2$gender = factor(e2$gender)
+e2$grades = factor(e2$grades)
+summary(e2)
+unique(e2$rollno) # 50 cases - 300 events
 #select fraction of rows randomly 
-e3 <- e2 %>% sample_frac(.8)
+set.seed(12); e3 <- e2 %>% sample_frac(.8)
 
 #create bupaR object -----
 events <- bupaR::simple_eventlog(eventlog = e3, case_id = 'rollno', activity_id = 'activity', timestamp = 'timestamp')
-
 events
+
+mapping(events)
+events %>% summary()
 head(events)
 str(events)
-summary(events)
-events$rollno
-events1 <- events %>% filter_case(cases = c('S-1','S-2','S-3','S-4','S-5'))
 
+(caselist = sample(unique(events$rollno), size=5,replace=F))
+#events1 <- events %>% filter_case(cases = c('S-1','S-2','S-3','S-4','S-5'))
+(events1 <- events %>% filter_case(cases = caselist))
+summary(events1)
+events1 %>% as.data.frame()
+unique(events1$rollno) #5 students
 #how many activities----
-activity_frequency(events1)
+events1 %>% activity_frequency() #stats summary
+events1 %>% activity_frequency() %>% plot()  #box plot
+
 #freq of participation in activities----
-events1 %>% activity_frequency(level='activity')
-events1 %>% activity_frequency(level='activity') %>% plot
+events1 %>% activity_frequency(level='activity') #count
+events1 %>% activity_frequency(level='activity') %>% plot  #abs & rel count
 
 #Process Map-----
 #only 1 at a time
 events1 %>% processmapR::process_map(sec=frequency('absolute'))
-events1 %>% processmapR::process_map(sec=frequency('relative'))
-events1 %>% processmapR::process_map(sec=frequency('absolute-case'))
-events1 %>% processmapR::process_map(sec=frequency('relative-case'))
-
-
-
+events1 %>% processmapR::process_map(sec=frequency('relative'), rankdir='TB')
+events1 %>% processmapR::process_map(sec=frequency('absolute-case'), rankdir='BT')
+events1 %>% processmapR::process_map(sec=frequency('relative-case'), rankdir='RL')
 #----
-?process_map
 #Animate Process-----
-absam1 <- animate_process(events1, duration=10, mode='absolute', mapping = token_aes(color=token_scale('red')))
-absam1
+video1a <- animate_process(events1, duration=10, mode='absolute', mapping = token_aes(color=token_scale('red')))
+video1a
 
-relam1 <- animate_process(events1, duration=10, mode='relative', mapping = token_aes(color=token_scale('red')))
-relam1
+video1b <- animate_process(events1, duration=10, mode='relative', sec=frequency('absolute'), mapping = token_aes(color=token_scale('yellow'), size=token_scale(10)))
+video1b
 
 #Color and size
-animate_process(events1, legend=T, mode='absolute', duration=10, mapping = token_aes(color = token_scale("red"), size = token_scale(10)))
-        
+video1c <- animate_process(events1, legend=T, mode='absolute', duration=10, sec=frequency('relative'), mapping = token_aes(color = token_scale("red"), size = token_scale(10)))
+video1c
+
+#Color and size
 names(events1)
-str(events1)
-events1$gender = factor(events1$gender)
-events1$grades = factor(events1$grades)
+events1 %>% animate_process(legend = "color", mode = "relative", mapping = token_aes(color = token_scale("rollno", scale = "ordinal", range = RColorBrewer::brewer.pal(n_cases(events1), "Paired")) , size = token_scale("actscores", scale = "linear",range=c(10,20)), shape='rect'),  duration=10, repeat_count = 2)
+
+#token_shape("gender", scale='ordinal', range=c('rect','rect'))),
+
+names(events1)
 
 #color as per gender----
 animate_process(events1,  legend = "color",   mapping = token_aes(color = token_scale("gender", scale='ordinal', range = c('red','blue'))), duration=10)
 
-#color as per grades----
-animate_process(events1,  legend = "color",   mapping = token_aes(color = token_scale("grades", scale='ordinal', range = c('green','yellow','red'))), duration=10)
+#color as per grades : rankdir----
+animate_process(events1,  legend = "color",   mapping = token_aes(color = token_scale("grades", scale='ordinal', range = c('green','yellow','red'))), duration=10, rankdir='BT', fixed_edge_width=T)
 
+#color as per grades : rankdir----
+animate_process(events1,  legend = "color",   mapping = token_aes(color = token_scale("grades", scale='ordinal', range = c('green','yellow','red'))), duration=10,  rankdir='TB', fixed_edge_width=F)
+
+#one by one- grades
 g=c('A','B','C') ; gc =c('green','yellow','red')
 i=3
-events1 %>% filter(grades == g[i]) %>% animate_process(legend = "color", mode='relative', mapping = token_aes(color = token_scale(gc[i]), size = token_scale(10)), duration=10, initial_state = 'paused', jitter=2, epsilon_time = 1)
+animateGrades <- function(i) {
+  events1 %>% filter(grades == g[i]) %>% animate_process(legend = "color", mode='relative', mapping = token_aes(color = token_scale(gc[i]), size = token_scale(10)), duration=10, initial_state = 'paused', jitter=2, epsilon_time = 1, rankdir='LR', sec=frequency('relative'))
+}
+animateGrades(i=1)
+animateGrades(i=2)
+animateGrades(i=3)
+
+animateGrades2 <- function(i) {
+  events1 %>% filter(grades == g[i]) %>% animate_process(legend = "size", mode='relative', mapping = token_aes(color = token_scale("gender", scale='ordinal', range = c('red','blue')), size = token_scale("actscores", scale = "quantize",range=c(10,15,20))), duration=10, initial_state = 'paused', jitter=2, epsilon_time = 1, rankdir='LR', sec=frequency('relative'))
+}
+events1 %>% filter(grades == g[1])
+animateGrades2(i=1)
+events1 %>% filter(grades == g[2]) %>% group_by(gender) %>% tally()
+animateGrades2(i=2)
+animateGrades2(i=3)
+
 
 
 #color as per gender using opacity ----
-animate_process(events1,  legend = "color",   mapping = token_aes(color = token_scale(attribute="gender", scale='ordinal', range = c('red','blue')), size=token_scale(12), opacity = token_scale('0.4')), duration=10)
+animate_process(events1,  legend = "color",   mapping = token_aes(color = token_scale(attribute="gender", scale='ordinal', range = c('red','blue')), size=token_scale(12), opacity = token_scale('0.4')), duration=10, initial_state = 'paused')
 
 str(events1$finalMarks)
 
-animate_process(events1,  legend = "size",   mapping = token_aes(size = token_scale(attribute="finalmarks", scale='quantize', range=1:3), opacity = token_scale('0.4')), duration=10)
+animate_process(events1,  legend = "color",   mapping = token_aes( color = token_scale(attribute="actscores", scale='quantize', range=c('red','green'))), duration=10)
 
-animate_process(events1,  legend = "color",   mapping = token_aes(color = token_scale(attribute="finalmarks", scale='quantize', range=c('red','yellow'))), duration=10)
+animate_process(events1,  legend = "color",   mapping = token_aes(color = token_scale(attribute="grades", scale='ordinal', range=c('red','yellow'))), duration=10)
 
 str(patients$employee)
-animate_process(patients, mode = "relative", jitter = 10, legend = "color",   mapping = token_aes(color = token_scale("employee", scale = "ordinal",   range = RColorBrewer::brewer.pal(7, "Paired"))))
+animate_process(events1, mode = "relative", jitter = 10, legend = "color",  mapping = token_aes(color = token_scale("rollno", scale = "ordinal",   range = RColorBrewer::brewer.pal(7, "Paired"))), duration=10)
+
 
 animate_process(events1, legend='size', mapping = token_aes(size = token_scale(10), shape = "rect"), duration=10)
+head(events1)
 
-animate_process(events1, legend=T, mode='relative', duration=10,  mapping = token_aes(color = token_scale('finalmarks'), scale = 'linear'))
+animate_process(events1,mode='relative', legend='size', duration=10,  mapping = token_aes(size = token_scale(attribute='actscores', scale = 'quantize', range=c(10,15))))
 
-htmlwidgets::saveWidget(ap1, file = "ap1.html")
 
 #activity presence----
 events1 %>% activity_presence() %>% plot
@@ -131,6 +169,7 @@ events1 %>%  filter_time_period(interval = ymd(c(20200201, 20200215)), filter_me
 
 #Trace Length-----
 events1
+
 events1 %>%  filter_trace_length(interval = c(2, 5)) %>% trace_length(units = "min")
 events1 %>%  filter_trace_length(percentage = 0.5) %>%  trace_length()
 #traces which have PPT
@@ -170,7 +209,7 @@ events1 %>%  filter_endpoints(start_activities = "Quiz", end_activities = "Forum
 #Precedence-----
 events1 %>%  filter_precedence(antecedents = "PPT",  consequents = "Quiz",precedence_type = "directly_follows") %>% bupaR::traces()
 #PPT follows Forum & Quiz - data/ traces
-events1 %>%  filter_precedence(antecedents = "PPT", consequents = c("Forum", "Quiz"),  precedence_type = "eventually_follows", filter_method = "all") %>%  traces
+events1 %>%  filter_precedence(antecedents = "PPT", consequents = c("Forum", "Quiz"),  precedence_type = "eventually_follows", filter_method = "all") %>%  traces()
 #PPT follows Forum and Quiz both directly or later
 events1 %>%  filter_precedence(antecedents = "PPT", consequents = c("Forum", "Quiz"),  precedence_type = "eventually_follows", filter_method = "all") %>%   process_map()
 
@@ -187,7 +226,8 @@ events1 %>%  filter_trace_frequency(percentage = 0.8) %>% process_map()
 events1 %>%  filter_trace_frequency(percentage = 0.5) %>% n_cases()
 
 #Or the cases of which the trace frequency is less than 25.
-events1 %>%  filter_trace_frequency(interval = c(3,5)) %>%   bupaR::n_cases()
+events1 %>% n_cases()
+events1 %>%  filter_trace_frequency(interval = c(2)) %>%   bupaR::n_cases()
 #????
 ?filter_trace_frequency
 #Time Period---
@@ -195,7 +235,7 @@ events1 %>%  filter_trace_frequency(interval = c(3,5)) %>%   bupaR::n_cases()
 ?filter_time_period
 events1 %>%  filter_time_period(interval = ymd(c(20200215, 20200220)), filter_method = "start")
 events1 %>%  filter_time_period(interval = ymd(c(20200210, 20200220)), filter_method = "complete") %>% bupaR::n_cases()
-events1 %>%  filter_time_period(interval = ymd(c(20200210, 20200220)), filter_method = "contained") %>% dotted_chart
+events1 %>%  filter_time_period(interval = ymd(c(20200210, 20200220)), filter_method = "contained") %>% dotted_chart()
 events1 %>%  filter_time_period(interval = ymd(c(20200210, 20200220)), filter_method = "intersecting") 
 events1 %>%  filter_time_period(interval = ymd(c(20200210, 20200220)), filter_method = "start") %>% dotted_chart(units='weeks')
 events1 %>%  filter_time_period(interval = ymd(c(20200210, 20200220)), filter_method = "start") %>% dotted_chart(units='hours')
@@ -205,21 +245,23 @@ events1 %>%  filter_time_period(interval = ymd(c(20200210, 20200220)), filter_me
 
 
 #graphs-----
-processmapR::resource_matrix(events1) %>% plot 
-processmapR::resource_map(events1)
-processmapR::trace_explorer(events1) 
-processmapR::trace_explorer(events1, .abbreviate=FALSE) 
-processmapR::trace_explorer(events1, coverage=.5, raw_data = TRUE)
-processmapR::trace_explorer(events1, coverage=.5)
-processmapR::trace_explorer(events1, n_traces=15)
-processmapR::trace_explorer(events1, n_traces=15, type='frequent')
-processmapR::trace_explorer(events1, n_traces=15, type='infrequent')
-plotly_trace_explorer(events1)
-?trace_explorer
+events1 %>% resource_matrix()
+events1 %>% resource_map()
 
+events1 %>% trace_explorer()
+events1 %>% trace_explorer(coverage=.2)
+events1 %>% trace_explorer(coverage=.5)
+events1 %>% trace_explorer(.abbreviate = F)
+events1 %>% trace_explorer(raw_data = T)
+events1 %>% trace_explorer(n_traces = 2)
+events1 %>% trace_explorer(n_traces = 15)
+events1 %>% trace_explorer(type='frequent')
+events1 %>% trace_explorer(type='infrequent', coverage=.8)
+events1 %>% plotly_trace_explorer()
+plotly_trace_explorer(events1)
 
 events1 %>%  filter_activity_frequency(percentage = 1.0) %>% 
-  filter_trace_frequency(percentage = .80) %>%  process_map(render = F) %>% DiagrammeR::export_graph(file_name = 'E:/PMC/pm11.png',  file_type = 'PNG')
+  filter_trace_frequency(percentage = .80) %>%  process_map(render = F) %>% DiagrammeR::export_graph(file_name = 'E:/PMO/pm11.png',  file_type = 'PNG')
 
 events1 %>%   filter_activity_frequency(percentage = 1.0) %>% 
   filter_trace_frequency(percentage = .80) %>%   precedence_matrix() %>%  plot()

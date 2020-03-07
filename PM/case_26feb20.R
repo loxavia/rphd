@@ -119,6 +119,7 @@ number_of_repetitions(event2, level="activity", type="repeat")
 number_of_selfloops(event2, level="case", type = "redo")
 
 
+
 #for each day, which resource was used how many times
 event2 %>% as.data.frame() %>% mutate(Date= as.Date(time)) %>% mutate("ID_day" = group_indices_(., .dots = c("resource","Date"))) %>% group_by(ID_day) %>% arrange(ID_day, time) %>% select(resource, ID_day, case) %>% group_by(case, ID_day, resource) %>% summarise(metric = n())
 #similar for activity
