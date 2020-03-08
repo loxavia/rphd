@@ -78,35 +78,35 @@ events1 %>% processmapR::process_map(sec=frequency('relative-case'), rankdir='RL
 video1a <- animate_process(events1, duration=10, repeat_count = 3, mode='absolute', mapping = token_aes(color=token_scale('red')))
 video1a
 
-video1b <- animate_process(events1, duration=10, mode='relative', sec=frequency('absolute'), mapping = token_aes(color=token_scale('yellow'), size=token_scale(10)))
+video1b <- animate_process(events1, duration=10, mode='relative', sec=frequency('absolute'), mapping = token_aes(color=token_scale('yellow'), size=token_scale(10)), repeat_count = 2)
 video1b
 
 #Color and size
-video1c <- animate_process(events1, legend=T, mode='absolute', duration=10, sec=frequency('relative'), mapping = token_aes(color = token_scale("red"), size = token_scale(10)))
+video1c <- animate_process(events1, legend=T, mode='absolute', duration=10, sec=frequency('relative'), mapping = token_aes(color = token_scale("red"), size = token_scale(10)), repeat_count = 2)
 video1c
 
 #Color and size
 names(events1)
-events1 %>% animate_process(legend = "color", mode = "relative", mapping = token_aes(color = token_scale("rollno", scale = "ordinal", range = RColorBrewer::brewer.pal(n_cases(events1), "Paired")) , size = token_scale("actscores", scale = "linear",range=c(10,20)), shape='rect'),  duration=10, repeat_count = 3)
+events1 %>% animate_process(legend = "color", mode = "relative", mapping = token_aes(color = token_scale("rollno", scale = "ordinal", range = RColorBrewer::brewer.pal(n_cases(events1), "Paired")) , size = token_scale("actscores", scale = "linear",range=c(10,20)), shape='rect'),  duration=10, repeat_count = 2)
 
 #token_shape("gender", scale='ordinal', range=c('rect','rect'))),
 
 names(events1)
 
 #color as per gender----
-animate_process(events1,  legend = "color", repeat_count = 4,  mapping = token_aes(color = token_scale("gender", scale='ordinal', range = c('red','blue'))), duration=20)
+animate_process(events1,  legend = "color", repeat_count = 2,  mapping = token_aes(color = token_scale("gender", scale='ordinal', range = c('red','blue'))), duration=20)
 
 #color as per grades : rankdir----
-animate_process(events1,  legend = "color",   mapping = token_aes(color = token_scale("grades", scale='ordinal', range = c('green','yellow','red'))), duration=10, rankdir='BT', fixed_edge_width=T)
+animate_process(events1,  legend = "color",   mapping = token_aes(color = token_scale("grades", scale='ordinal', range = c('green','yellow','red'))), duration=10, rankdir='BT', fixed_edge_width=T, repeat_count = 2)
 
 #color as per grades : rankdir----
-animate_process(events1,  legend = "color",   mapping = token_aes(color = token_scale("grades", scale='ordinal', range = c('green','yellow','red'))), duration=10,  rankdir='TB', fixed_edge_width=F)
+animate_process(events1,  legend = "color",   mapping = token_aes(color = token_scale("grades", scale='ordinal', range = c('green','yellow','red'))), duration=10,  rankdir='TB', fixed_edge_width=F, repeat_count = 2)
 
 #one by one- grades
 g=c('A','B','C') ; gc =c('green','yellow','red')
 i=3
 animateGrades <- function(i) {
-  events1 %>% filter(grades == g[i]) %>% animate_process(legend = "color", mode='relative', mapping = token_aes(color = token_scale(gc[i]), size = token_scale(10)), duration=10, initial_state = 'paused', jitter=2, epsilon_time = 1, rankdir='LR', sec=frequency('relative'))
+  events1 %>% filter(grades == g[i]) %>% animate_process(legend = "color", mode='relative', mapping = token_aes(color = token_scale(gc[i]), size = token_scale(10)), duration=10, jitter=2, epsilon_time = 1, rankdir='LR', sec=frequency('relative'))
 }
 animateGrades(i=1)
 animateGrades(i=2)
@@ -115,6 +115,7 @@ animateGrades(i=3)
 animateGrades2 <- function(i) {
   events1 %>% filter(grades == g[i]) %>% animate_process(legend = "size", mode='relative', mapping = token_aes(color = token_scale("gender", scale='ordinal', range = c('red','blue')), size = token_scale("actscores", scale = "quantize",range=c(10,15,20))), duration=10, initial_state = 'paused', jitter=2, epsilon_time = 1, rankdir='LR', sec=frequency('relative'))
 }
+
 events1 %>% filter(grades == g[1])
 animateGrades2(i=1)
 events1 %>% filter(grades == g[2]) %>% group_by(gender) %>% tally()
