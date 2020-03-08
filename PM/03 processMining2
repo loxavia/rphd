@@ -1,8 +1,6 @@
 #Process Mining
 
 
-https://medium.com/@gscheithauer/process-mining-in-10-minutes-with-r-1ab28ed74e81
-
 
 events %>%    summary
 

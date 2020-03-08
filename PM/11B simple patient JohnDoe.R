@@ -2,10 +2,9 @@
 
 #patients - John Doe
 
-install.packages("bupaR","edeaR", "eventdataR","processmapR","processmonitR","xesreadR","petrinetR")
-library(bupaR); library(eventdataR);
-library(edeaR);library(processanimateR); library(processmapR) ; library(processmonitR) ;library(lubridate)
-library(gsheet); library(dplyr)
+#install.packages("bupaR","edeaR", "eventdataR","processmapR","processmonitR","xesreadR","petrinetR")
+pacman::p_load(bupaR,edeaR, eventdataR,processmapR,processmonitR,xesreadR,petrinetR) 
+pacman::p_load(gsheet, dplyr, DiagrammeR,lubridate) 
 
 link ='https://docs.google.com/spreadsheets/d/1Rv-8pDWMeonmjn7LCZh55MJtIh0XG5vHX-mIZpcGf1c/edit#gid=30764335'
 
@@ -82,9 +81,7 @@ trace_length(eventlog)
 eventlog %>% dotted_chart()
 
 #subsetting 
-ifilter_activity(eventlog)
 names(eventlog)
-
 
 eventlog %>% process_matrix() %>% plot()
 eventlog %>% process_matrix(type=performance()) %>% plot()
@@ -97,12 +94,9 @@ eventlog %>% precedence_matrix(type='relative-case') %>% plot()
 #processmap
 eventlog %>% process_map(type=frequency('relative'))
 eventlog %>% process_map(type=frequency('absolute'))
-
 eventlog %>% process_map(type=frequency('absolute'), rankdir='TB')
 eventlog %>% process_map(type=frequency('absolute'), rankdir='BT')
 eventlog %>% process_map(type=frequency('absolute'), rankdir='RL')
-
-
 eventlog %>% process_map(type=frequency('absolute'),fixed_edge_width=T)
 eventlog %>% process_map(type=frequency('absolute'),fixed_edge_width=F)
 
@@ -114,18 +108,20 @@ eventlog %>% resource_matrix(type = "relative")
 eventlog %>% resource_matrix(type = "relative_antecedent")     
 eventlog %>% resource_matrix(type = "relative_consequent")     
 
-?resource_matrix
-#trace explorere-----
-trace_explorer(eventlog, coverage = NULL, n_traces = NULL,
-type = c("frequent", "infrequent"), .abbreviate = T, show_labels = T, scale_fill = scale_fill_discrete(h = c(0, 360) + 15, l = 40),raw_data = F)
+#trace explorer-----
+#trace_explorer(eventlog, coverage = NULL, n_traces = NULL, type = c("frequent", "infrequent"), .abbreviate = T, show_labels = T, scale_fill = scale_fill_discrete(h = c(0, 360) + 15, l = 40),raw_data = F)
 eventlog %>% trace_explorer()
 eventlog %>% trace_explorer(.abbreviate = F)
 eventlog %>% trace_explorer(n_traces = 1, type='frequent')
 eventlog %>% trace_explorer(show_labels = F, raw_data = F)
-?process_map
-eventlog %>% animate_process(duration=10, mode='absolute', repeat_count = 1)
-eventlog %>% animate_process(duration=5, mode='relative', repeat_count = 2, initial_state = 'paused')
+eventlog %>% animate_process(duration=5, mode='absolute', repeat_count = 1)
+eventlog %>% animate_process(duration=5, mode='relative', repeat_count = 2, initial_state = 'paused', sec=frequency('relative'))
 
 ?animate_process
 #Generating Data----------------------------------
 structure(list(patient = structure(c(1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L), .Label = "John Doe", class = "factor"), activity = structure(c(1L, 3L, 3L, 3L, 4L, 4L, 3L, 3L, 2L), .Label = c("check-in", "check-out", "surgery", "treatment"), class = "factor"), timestamp = structure(1:9, .Label = c("2017-05-10 08:33:26","2017-05-10 08:38:21", "2017-05-10 08:53:16", "2017-05-10 09:25:19",    "2017-05-10 10:01:25", "2017-05-10 10:35:18", "2017-05-10 10:41:35",  "2017-05-10 11:05:56", "2017-05-11 14:52:36"), class = "factor"),  status = structure(c(1L, 2L, 3L, 1L, 3L, 1L, 3L, 1L, 1L), .Label = c("complete", "schedule", "start"), class = "factor"), activity_instance = c(1L, 2L, 2L, 2L, 3L, 3L, 4L, 4L, 5L), resource = structure(c(3L, 1L, 2L, 2L, 1L, 1L, 4L, 4L, 3L), .Label = c("Danny", "Richard", "Samantha", "William"), class = "factor")), class = "data.frame", row.names = c(NA, -9L))
+
+
+
+#misc----
+ifilter_activity(eventlog)

@@ -17,3 +17,7 @@ easypackages::libraries("plyr", "psych", "tm") #load
 easypackages::packages("plyr", "psych", "tm")  #install
 
 https://rdrr.io/a/github/gertjanssenswillen/edeaR/src/R/activity_presence.R
+
+
+https://medium.com/@gscheithauer/process-mining-in-10-minutes-with-r-1ab28ed74e81
+

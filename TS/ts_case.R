@@ -2,23 +2,23 @@
 
 #libraries - zoo, xts, lubridate, 
 pacman::p_load(gsheet, lubridate, zoo, xts, quantmod, TTR, forecast) 
-
+.libPaths()
 start <- as.Date("2020-01-01")
 end <- as.Date("2020-02-29")
 end - start
-
-getSymbols("SBIN.NS", src = "yahoo", from = start, to = end)
-
+#c("ICICIBANK.NS", "TATAMOTORS.NS")
+quantmod::getSymbols("SBIN.NS", src = "yahoo", from = start, to = end)
+head(SBIN.NS)
 df = SBIN.NS
 head(df)
-gsub(".", names(df))
+names(df)
 colnames(df)
 #create new column names
 unlist(strsplit("a.b.c", "\\."))
 unlist(strsplit(names(df), "\\."))
 (newColNames <- unlist(strsplit(names(df), "\\."))[seq(3,18,3)])
 names(df)= newColNames
-
+#names(df) =c('Open','High','Low','Close','Volume','Adjusted')
 head(df)
 str(df)
 index(df)  #rownames
@@ -27,17 +27,20 @@ coredata(df) #column values
 #times series
 plot(df$Open)
 plot(df, legend.loc = 'left')
+plot(df, legend.loc = 'left', multi.panel = T)
 plot(df[,c('Open','Close')], legend.loc = 'top')
+plot(df[,c('Open','Close')], legend.loc = 'top', multi.panel = T)
 plot(df[,c('Open','Close')], legend.loc ='right', subset="2020-01-01/2020-01-15")
 plot(df[,1:4], multi.panel = T)
 plot(df[,1:4], multi.panel = T, type='h')
-plot(df[,1:4], multi.panel = T, type='h', horiz=)
-
-
+plot(df[,1:4], multi.panel = F, legend.loc = 'top')
+candleChart(df, up.col = "green", dn.col = "red", theme = "white")
 
 #properties
 periodicity(df)
 to.weekly(df)
+?to.weekly
+head(df)
 to.monthly(df)
 to.quarterly(df)
 to.yearly(df)
@@ -57,11 +60,12 @@ tail(df)
 #apply functions
 apply.weekly(df, FUN=mean)
 apply.monthly(df, FUN=mean)
+apply.monthly(df$Open, FUN=sd)
 apply.quarterly(df, FUN=mean)
-?apply.weekly
 
 #endpoint
 endpoints(df, on='weeks')
+df[endpoints(df, on='weeks'),]
 endpoints(df, on='months')
 df[endpoints(df, on='months'),]
 
@@ -70,8 +74,11 @@ df[endpoints(df, on='months'),]
 period.apply(df,INDEX=wep,FUN=mean)
 
 #split data
-split(df, f='months')
-
+(sdata <- split(df, f='months'))
+sdata[[1]]
+sdata[[2]]
+(sdata <- split(df, f='weeks'))
+sdata[[3]]
 
 #subset
 df['2020']
@@ -79,17 +86,23 @@ df['2020-01']
 df['2020-01-16']
 
 #first & last
-first(df,'1 week') #Extract first 1 week
+first(df,'2 week') #Extract first 1 week
 first(last(df,'1 week'),'3 days') #Get first 3 days of the last week of data
+df[c('2020-01-16', '2020-02-17')]
+class(start(df))
+df[seq(as.Date('2020-01-01'), as.Date('2020-01-31'), 2),]
+df[seq(start(df), end(df), 5),]
 
-
-df[c('2020-01-16', '2020-01-16')]
 #weekend
 .indexwday(df)
 df[.indexwday(df)==5,]
-
+#lubridate package functions
 #------------------------------------------
+
 #TS data
+AirPassengers
+monthplot(AirPassengers)
+class(AirPassengers)
 (inputData = as.vector(AirPassengers))
 length(inputData)
 ts (inputData, frequency = 4, start = c(1959, 2))
@@ -99,8 +112,10 @@ ts (inputData, frequency = 12, start = 1990)
 ts (inputData, start=c(1950), end=c(2020), frequency=1)
 # Yearly Data
 
-#lag
-(monTS <- ts (inputData, frequency = 12, start = 1990)) #Monthly data. 
+#Monthly TS
+(inputData = as.vector(AirPassengers))
+(monTS <- ts (inputData, frequency = 12, start = c(2010,3))) #Monthly data.
+
 (monTSlagged <- stats::lag(monTS, k=-1))
 monTS
 monTSlagged
@@ -135,15 +150,18 @@ library(TTR)
 head(monTS)
 SMA(monTS,n=3)
 EMA(monTS,n=3)
-
+plot(monTS)
+lines(SMA(monTS,n=12), col='red')
 #Exponential ------
-exp
+?forecast::ets
+#(self study)
 
 #find Trend, Seasonal, Irregular components
 AirPassengers
 plot(AirPassengers)
 plot(decompose(AirPassengers))
 #what are the different trends
+#additive & multiplicative Ts
 
 #forecast & arima
 library(forecast)
@@ -153,15 +171,15 @@ auto.arima(monTS)
 #mov avg m=4
 autoplot(monTS)
 #without seasonsal
-auto.arima(monTS, seasonal = F)
+auto.arima(monTS, seasonal = T)
 
 #Model
 arimaModel = auto.arima(monTS)
-checkresiduals(arimaModel)
+#checkresiduals(arimaModel)
 #read about these
 
 #Forecast
-fcModel <- forecast(arimaModel)
+fcModel <- forecast(arimaModel,20)
 fcModel$mean  #10 elements ahead
 autoplot(fcModel)
 
@@ -171,7 +189,7 @@ df.open
 str(df.open)
 
 # function to compute simple returns
-simple.ret <- df.open / lag(df.open)
+(simple.ret <- df.open / lag(df.open))
 # plot the close and add a panel with the simple returns
 plot(df.open)
 lines(simple.ret, type="h", on=NA)
@@ -179,9 +197,7 @@ lines(simple.ret, type="h", on=NA)
 plot(df.open)
 lines(TTR::SMA(simple.ret), on=NA, col="blue")
 
-
 #arima
-
 start1 <- as.Date("2010-01-01") ;end1 <- as.Date("2020-02-10")
 getSymbols("SBIN.NS", src = "yahoo", from = start1, to = end1)
 dim(SBIN.NS)
@@ -191,3 +207,6 @@ arimaModel2 = forecast::auto.arima(df1.open)
 (fcModel2 = forecast(arimaModel2,100))
 tail(SBIN.NS[,1],100)
 autoplot(fcModel2)
+
+#end here-----
+
