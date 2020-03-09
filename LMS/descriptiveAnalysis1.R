@@ -4,6 +4,7 @@ library(ggplot2)
 library(tidyverse)  #load forcats
 library(magrittr)  #<> function
 library(lubridate)
+library(wordcloud2)
 
 #from Adminer, export data from mdl_logstore_standard_log
 #into csv - gzip format
@@ -39,7 +40,7 @@ data$origin[data$origin ==''] = 'None'
 table(data$origin)
 ggplot(data, aes(x=origin, y=..count.., fill=origin)) + geom_bar(stat='count') + geom_text(stat='count', aes(label=..count..), vjust=-.5) + labs(title='Summary of Activities in LMS', subtitle = 'Command Line, Restore, Web, Web Service, Others/NA') + scale_fill_discrete(name = "Origin of Access", breaks= c('cli','restore','web','ws','None'), labels = c("CLI",'Restore', "Web", "Web Service",'NotAvl'))
 
-#------
+#time frame------
 names(data)
 head(data$timecreated)
 value <- 1372657859 ; as.Date(as.POSIXct(value, origin="1970-01-01"))  
@@ -60,14 +61,21 @@ table(data$contextlevel)
 
 ggplot(data, aes(x=contextlevel, y=..count.., fill=contextlevel)) + geom_bar(stat='count') + geom_text(stat='count', aes(label=..count..), vjust=-.5) + labs(title='Summary of Activities in LMS', subtitle = 'Context Levels - System, User, CourseCategory, Course, Module,Block') + scale_fill_discrete(name = "Context Level") +  theme(legend.position="top", legend.direction="horizontal", plot.title = element_text(hjust = 0.5)) + guides(fill = guide_legend(nrow = 1))
 
-
-#------
+#course wise----
 names(data)
 table(data$contextinstanceid)
 table(data$courseid)
 data %>% group_by(courseid)  %>% summarise(n=n())
 ggplot(data, aes(x=courseid, y=..count.., fill=factor(courseid))) + geom_bar(stat='count') + geom_text(stat='count', aes(label=..count..), vjust=-.5) + labs(title='Summary of Activities in LMS', subtitle = 'Context Wise - Count of Events - (Course ID)')   + scale_fill_discrete(name = "Course ID")  +  theme(legend.position="top", legend.direction="horizontal", plot.title = element_text(hjust = 0.5))  + guides(fill = guide_legend(nrow = 2))
 
+par(mar=c(0,0,0,0))
+data %>% group_by(courseid)  %>% summarise(n=n()) %>% mutate(courseid = factor(courseid)) %>% wordcloud2::wordcloud2(., minSize=4, rotateRatio = 0, size=2, shuffle = T, gridSize = 2)
+
+(wcdata <- data %>% group_by(courseid)  %>% summarise(n=n()) %>% as.data.frame())
+par(mar=c(0,0,0,0))
+wordcloud::wordcloud(words=wcdata$courseid, freq=wcdata$n, scale=c(6,3), random.color = T, colors=1:5)
+
+?wordcloud::wordcloud
 #+ guides(fill=FALSE) + theme(legend.position = 'top')
 + guides(fill = guide_legend(label.position = "bottom"))
 #ggpubr::ggpie(., "n", label = "courseid", fill='courseid', legend=T)
