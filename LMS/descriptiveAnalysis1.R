@@ -1,10 +1,6 @@
 #analysing data from LA LMS
-library(dplyr)
-library(ggplot2)
-library(tidyverse)  #load forcats
-library(magrittr)  #<> function
-library(lubridate)
-library(wordcloud2)
+
+pacman::p_load(dplyr, ggplot2, ggplot2,tidyverse,magrittr, lubridate,wordcloud2, bupaR, processanimateR)
 
 #from Adminer, export data from mdl_logstore_standard_log
 #into csv - gzip format
@@ -38,7 +34,8 @@ data$origin <- factor(data$origin, levels = olevels)
 data$origin[data$origin ==''] = 'None'
 
 table(data$origin)
-ggplot(data, aes(x=origin, y=..count.., fill=origin)) + geom_bar(stat='count') + geom_text(stat='count', aes(label=..count..), vjust=-.5) + labs(title='Summary of Activities in LMS', subtitle = 'Command Line, Restore, Web, Web Service, Others/NA') + scale_fill_discrete(name = "Origin of Access", breaks= c('cli','restore','web','ws','None'), labels = c("CLI",'Restore', "Web", "Web Service",'NotAvl'))
+gLMS1 <- ggplot(data, aes(x=origin, y=..count.., fill=origin)) + geom_bar(stat='count') + geom_text(stat='count', aes(label=..count..), vjust=-.5) + labs(title='Summary of Activities in LMS', subtitle = 'Command Line, Restore, Web, Web Service, Others/NA', caption='Developed by Dhiraj Upadhyaya') + scale_fill_discrete(name = "Origin of Access", breaks= c('cli','restore','web','ws','None'), labels = c("CLI",'Restore', "Web", "Web Service",'NotAvl')) + theme(plot.title = element_text(hjust = 0.5), legend.position = 'top')
+gLMS1
 
 #time frame------
 names(data)
@@ -47,9 +44,10 @@ value <- 1372657859 ; as.POSIXct(value, origin="1970-01-01")
 data$timecreated <- as.POSIXct(data$timecreated, origin="1970-01-01")  
 paste(as.character(range(data$timecreated)))
 #duration <- paste(duration, paste(as.character(range(data$timecreated))))
-(dur = paste(as.character(min(as.Date(data$timecreated))), as.character(max(as.Date(data$timecreated))), sep=' to '))
+(dur1 = paste(as.character(min(as.Date(data$timecreated))), as.character(max(as.Date(data$timecreated))), sep=' to '))
 
-data %>% mutate(timecreated = as.Date(timecreated)) %>% group_by(month=floor_date(timecreated, "month")) %>% summarize(count =n())  %>% ggplot(., aes(x = month, y = count)) +  geom_line(color = "#00AFBB", size = 2) + scale_x_date(date_breaks = '1 month', date_labels = "%b/%y") + theme(axis.text.x = element_text(angle = 30)) + labs(title='Number of Events : Month Wise', subtitle = paste('Duration', dur))
+gLMS2 <- data %>% mutate(timecreated = as.Date(timecreated)) %>% group_by(month=floor_date(timecreated, "month")) %>% summarize(count =n())  %>% ggplot(., aes(x = month, y = count)) +  geom_line(color = "#00AFBB", size = 2) + scale_x_date(date_breaks = '1 month', date_labels = "%b/%y") + theme(axis.text.x = element_text(angle = 30)) + labs(title='Number of Events : Month Wise', subtitle = paste('Duration', dur1), caption='Developed by Dhiraj Upadhyaya') + theme(plot.title = element_text(hjust = 0.5))
+gLMS2
 
 #context level-----
 table(data$contextlevel)
@@ -59,15 +57,18 @@ context_levels
 data$contextlevel = factor(data$contextlevel, ordered=T, labels=names(context_levels), levels=context_levels)
 table(data$contextlevel)
 
-ggplot(data, aes(x=contextlevel, y=..count.., fill=contextlevel)) + geom_bar(stat='count') + geom_text(stat='count', aes(label=..count..), vjust=-.5) + labs(title='Summary of Activities in LMS', subtitle = 'Context Levels - System, User, CourseCategory, Course, Module,Block') + scale_fill_discrete(name = "Context Level") +  theme(legend.position="top", legend.direction="horizontal", plot.title = element_text(hjust = 0.5)) + guides(fill = guide_legend(nrow = 1))
+gLMS3 <- ggplot(data, aes(x=contextlevel, y=..count.., fill=contextlevel)) + geom_bar(stat='count') + geom_text(stat='count', aes(label=..count..), vjust=-.5) + labs(title='Summary of Activities in LMS', subtitle = 'Context Levels - System, User, CourseCategory, Course, Module,Block', caption='Developed by Dhiraj Upadhyaya') + scale_fill_discrete(name = "Context Level") +  theme(legend.position="top", legend.direction="horizontal", plot.title = element_text(hjust = 0.5)) + guides(fill = guide_legend(nrow = 1))
+gLMS3
 
 #course wise----
 names(data)
 table(data$contextinstanceid)
 table(data$courseid)
 data %>% group_by(courseid)  %>% summarise(n=n())
-ggplot(data, aes(x=courseid, y=..count.., fill=factor(courseid))) + geom_bar(stat='count') + geom_text(stat='count', aes(label=..count..), vjust=-.5) + labs(title='Summary of Activities in LMS', subtitle = 'Context Wise - Count of Events - (Course ID)')   + scale_fill_discrete(name = "Course ID")  +  theme(legend.position="top", legend.direction="horizontal", plot.title = element_text(hjust = 0.5))  + guides(fill = guide_legend(nrow = 2))
+gLMS4 <- ggplot(data, aes(x=factor(courseid), y=..count.., fill=factor(courseid))) + geom_bar(stat='count') + geom_text(stat='count', aes(label=..count..), vjust=-.1, angle=30,size=rel(2.5)) + labs(title='Summary of Activities in LMS', subtitle = 'Context Wise - Count of Events - (Course ID)', caption='Developed by Dhiraj Upadhyaya')   + scale_fill_discrete(name = "Course ID")  +  theme(legend.position="top", legend.direction="horizontal", plot.title = element_text(hjust = 0.5))  + guides(fill = guide_legend(nrow = 2)) + scale_y_discrete(name='Courses')
+gLMS4
 
+#----
 par(mar=c(0,0,0,0))
 data %>% group_by(courseid)  %>% summarise(n=n()) %>% mutate(courseid = factor(courseid)) %>% wordcloud2::wordcloud2(., minSize=4, rotateRatio = 0, size=2, shuffle = T, gridSize = 2)
 
@@ -99,7 +100,7 @@ head(data3)
 events <- bupaR::simple_eventlog(eventlog = data3,   case_id = 'userid',  activity_id = 'L4', timestamp = 'timecreated' )
 
 events %>% n_events()
-events %>% trace_explorer()
+events %>% trace_explorer(coverage=1)
 events %>% n_traces()
 events %>% n_activities()
 events %>% activity_frequency()
