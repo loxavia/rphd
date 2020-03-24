@@ -16,7 +16,7 @@ head(e1)
 
 #sample dates of month
 set.seed(123)
-e1$timestamp = as.POSIXct(as.Date(paste('2020','2',sample(1:30, size=nrow(e1), replace=T),sep='-')))
+e1$timestamp = as.POSIXct(as.Date(paste('2020','3',sample(1:25, size=nrow(e1), replace=T),sep='-')))
 
 set.seed(124)
 (e1$actscores = round(rnorm(nrow(e1), mean=60, sd=8)))
@@ -75,19 +75,21 @@ events1 %>% processmapR::process_map(sec=frequency('absolute-case'), rankdir='BT
 events1 %>% processmapR::process_map(sec=frequency('relative-case'), rankdir='RL')
 #----
 #Animate Process-----
-video1a <- animate_process(events1, duration=10, repeat_count = 3, mode='absolute', mapping = token_aes(color=token_scale('red')))
+video1a <- animate_process(events1, duration=20, repeat_count = 1, mode='absolute', mapping = token_aes(color=token_scale('red')))
 video1a
 
-video1b <- animate_process(events1, duration=10, mode='relative', sec=frequency('absolute'), mapping = token_aes(color=token_scale('yellow'), size=token_scale(10)), repeat_count = 2)
+video1b <- animate_process(events1, duration=20, mode='relative', sec=frequency('absolute'), mapping = token_aes(color=token_scale('yellow'), size=token_scale(10)), repeat_count = 2)
 video1b
 
 #Color and size
-video1c <- animate_process(events1, legend=T, mode='absolute', duration=10, sec=frequency('relative'), mapping = token_aes(color = token_scale("red"), size = token_scale(10)), repeat_count = 2)
+video1c <- animate_process(events1, legend=T, mode='absolute', duration=20, sec=frequency('relative'), mapping = token_aes(color = token_scale("red"), size = token_scale(10)), repeat_count = 2)
 video1c
 
 #Color and size
 names(events1)
-events1 %>% animate_process(legend = "color", mode = "relative", mapping = token_aes(color = token_scale("rollno", scale = "ordinal", range = RColorBrewer::brewer.pal(n_cases(events1), "Paired")) , size = token_scale("actscores", scale = "linear",range=c(10,20)), shape='rect'),  duration=10, repeat_count = 2)
+events1 %>% animate_process(legend = "color", mode = "absolute", mapping = token_aes(color = token_scale("rollno", scale = "ordinal", range = RColorBrewer::brewer.pal(n_cases(events1), "Paired")) , size = token_scale("actscores", scale = "linear",range=c(10,20)), shape='rect'),  duration=20, repeat_count = 2)
+
+events1 %>% animate_process(legend = "color", mode = "relative", mapping = token_aes(color = token_scale("rollno", scale = "ordinal", range = RColorBrewer::brewer.pal(n_cases(events1), "Paired")) , size = token_scale("actscores", scale = "linear",range=c(10,20)), shape='rect'),  duration=20, repeat_count = 2)
 
 #token_shape("gender", scale='ordinal', range=c('rect','rect'))),
 

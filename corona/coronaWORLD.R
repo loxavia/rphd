@@ -1,11 +1,10 @@
 #corona Status
-library(pacman)  #loading multiple libraries
-#library(ggplot2); library(dplyr); library(rvest); library(xml2)
+#https://www.worldometers.info/world-population/population-by-country/
 pacman::p_load(ggplot2, dplyr, rvest, xml2, gridExtra, reshape2)
 options(scipen = T)
 
 #rename Columns
-newcols = c('country', 'Cases','newCases','Deaths','newDeaths', 'Recovered', 'activeCases','serious', 'casePerM')
+newcols = c('country', 'Cases','newCases','Deaths','newDeaths', 'Recovered', 'activeCases','serious', 'casePerM','deathsPerM')
 (today = Sys.Date())
 (yesterday = today-1)
 (caption1 = paste('Source -"https://www.worldometers.info/coronavirus/', ' : Compiled by @Dhiraj :', ' @ ', Sys.time()))
@@ -154,6 +153,10 @@ gCSum1 <- summary1 %>% melt(id.var='status') %>% ggplot(., aes(x=status, y=value
 gCSum1
 gCSum2 <- summary2 %>% filter(country %in% countries) %>% melt(id.var=c('status','country')) %>% ggplot(., aes(x=status, y=value, fill=variable)) + geom_bar(stat='identity', position=position_stack()) + facet_wrap(. ~ country, scales='free') + ggrepel::geom_text_repel(aes(label=value, y=value), position = position_stack(), size=2) + theme(axis.text.x = element_text(angle=30, size=rel(.8)),legend.position = 'top', plot.title = element_text(hjust = 0.5, color = "#666666")) + labs(title=paste('gCSum2 :', today, ' & ', yesterday, ' : Status of Corona : Top countries + India : Free Scale'), caption = caption1, y='Numbers', x='Dates') + guides(fill=guide_legend(nrow=1,byrow=TRUE))
 gCSum2
+
+both2
+
+
 #end---
 both2$compileDate = '2020-03-23'
 write.csv(both2,'E:/data/both23mar.csv', na='')

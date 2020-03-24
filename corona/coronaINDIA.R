@@ -1,11 +1,12 @@
 #india Corona
-
+pacman::p_load(ggplot2, dplyr, rvest, xml2, gridExtra, reshape2,wesanderson)
 #india gov site-----
 (caption2 = paste('Compiled from https://www.mohfw.gov.in/', ' @Dhiraj ', ' :Status on', Sys.time()))
 
 indcorona <- xml2::read_html("https://www.mohfw.gov.in/")
 #table1 - today-----
-indcovid1 <- indcorona %>%  html_nodes("table") %>% .[[2]] %>%   html_table()
+#table no changed----
+indcovid1 <- indcorona %>%  html_nodes("table") %>% .[[8]] %>%   html_table()
 head(indcovid1)
 newcolsIndia = c('ser','state', 'Ind','For','Rec','Death')
 var = c('Indians', 'Foreign', 'recoveredAll', 'death')
@@ -45,4 +46,11 @@ gbarIndia2
 gbarIndia1
 gbarIndia3 #use this instead of gbarIndia2
 
+#pie
+table(indcovid1Melt1$variable)
+str(indcovid1Melt1)
+indcovid1Melt1 %>% filter(variable=='Ind') %>% select(state, value) %>% mutate(level = ifelse(value >5, 'G10', 'L10')) %>% group_by(level) %>% summarise(n=length(level)) %>% ggpubr::ggpie(., "n", label = 'level', lab.pos = 'in', fill = "level", color='white')  + theme_classic() + guides(fill=F)
+
+#scale_fill_gradient(low="blue", high="red")
+#+ scale_fill_grey(start=0.8, end=0.2)
 write.csv(indcovid1B,'E:/data/indcove23mar.csv', na='', row.names=F)
