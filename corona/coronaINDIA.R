@@ -53,4 +53,4 @@ indcovid1Melt1 %>% filter(variable=='Ind') %>% select(state, value) %>% mutate(l
 
 #scale_fill_gradient(low="blue", high="red")
 #+ scale_fill_grey(start=0.8, end=0.2)
-write.csv(indcovid1B,'E:/data/indcove23mar.csv', na='', row.names=F)
+write.csv(indcovid1B,paste('E:/data/indcovid',Sys.Date(),'.csv'), na='', row.names=F)

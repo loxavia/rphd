@@ -28,3 +28,4 @@ ctable43
 cols3 = c('preCondition', 'deathRateConfirmed', 'deathRateAll')
 names(ctable43) = cols3
 ctable43
+

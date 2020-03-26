@@ -1,7 +1,7 @@
 #multiple Activities - PM
 
 #libraries
-pacman::p_load(gsheet, bupaR, dplyr, edeaR, processmapR, processanimateR, DiagrammeR,lubridate) 
+pacman::p_load(gsheet, bupaR, dplyr, edeaR, processmapR, processanimateR, DiagrammeR,lubridate, htmlwidgets) 
 
 #create some activities
 (activities = c('Forum', 'PPT', 'Assignment','Quiz', 'Game' ,'Survey'))
@@ -42,23 +42,22 @@ head(e2)
 e2$gender = factor(e2$gender)
 e2$grades = factor(e2$grades)
 summary(e2)
-unique(e2$rollno) # 50 cases - 300 events
-#select fraction of rows randomly 
-set.seed(12); e3 <- e2 %>% sample_frac(.8)
+unique(e2$rollno) # 5
 
 #create bupaR object -----
-events1 <- bupaR::simple_eventlog(eventlog = e3, case_id = 'rollno', activity_id = 'activity', timestamp = 'timestamp')
+events1 <- bupaR::simple_eventlog(eventlog = e2, case_id = 'rollno', activity_id = 'activity', timestamp = 'timestamp')
 events1
 
 mapping(events1)
 events1 %>% summary()
 head(events1)
-str(event1s)
+str(events1)
 
 #Process Map-----
-events1 %>% processmapR::process_map(sec=frequency('absolute'))
-events1 %>% processmapR::process_map(sec=frequency('relative'), rankdir='TB')
-
+e1pm1 <- events1 %>% processmapR::process_map(sec=frequency('absolute'))
+e1pm1
+e1pm2 <- events1 %>% processmapR::process_map(sec=frequency('relative'), rankdir='TB')
+e1pm2
 video1a <- animate_process(events1, duration=20, repeat_count = 1, mode='absolute', mapping = token_aes(color=token_scale('red')))
 video1a
 
@@ -90,11 +89,11 @@ video1h <- animateGrades(i=2)
 video1j <- animateGrades(i=3)
 
 animateGrades2 <- function(i) {
-  events1 %>% filter(grades == g[i]) %>% animate_process(legend = "size", mode='relative', mapping = token_aes(color = token_scale("gender", scale='ordinal', range = c('red','blue')), size = token_scale("actscores", scale = "quantize",range=c(1,2,3))), duration=10, initial_state = 'paused', jitter=2, epsilon_time = 1, rankdir='LR', sec=frequency('relative'))
+  events1 %>% filter(grades == g[i]) %>% animate_process(legend = "size", mode='relative', mapping = token_aes(color = token_scale("gender", scale='ordinal', range = c('red','blue')), size = token_scale("actscores", scale = "quantize",range=c(2,3,4))), duration=10, initial_state = 'paused', jitter=2, epsilon_time = 1, rankdir='LR', sec=frequency('relative'))
 }
-video1k1 <- animateGrades2(i=1)
-video1k2 <- animateGrades2(i=2)
-video1k3 <- animateGrades2(i=3)
+(video1k1 <- animateGrades2(i=1))
+(video1k2 <- animateGrades2(i=2))
+(video1k3 <- animateGrades2(i=3))
 
 #color as per gender using opacity ----
 video1m <- animate_process(events1,  legend = "color",   mapping = token_aes(color = token_scale(attribute="gender", scale='ordinal', range = c('red','blue')), size=token_scale(12), opacity = token_scale('0.4')), duration=10, initial_state = 'paused')
@@ -108,9 +107,40 @@ video1o
 video1p <- animate_process(events1, mode = "relative", jitter = 10, legend = "color",  mapping = token_aes(color = token_scale("rollno", scale = "ordinal",   range = RColorBrewer::brewer.pal(7, "Paired"))), duration=10)
 video1p
 
+#size of shape----
 video1q <- animate_process(events1, legend='size', mapping = token_aes(size = token_scale(10), shape = "rect"), duration=10)
 head(events1)
 video1q
 
-video1r <- animate_process(events1,mode='relative', legend=NULL, duration=10,  mapping = token_aes(size = token_scale(attribute='actscores',scale = 'quantize', range=c(10,15))))
+#after every activity size changes as per score
+video1r <- animate_process(events1, sec=frequency('relative'), mode='relative', legend='color', duration=20,  mapping = token_aes(size = token_scale(attribute='actscores',scale = 'quantize', range=c(10,15)), color = token_scale("rollno", scale = "ordinal", range = RColorBrewer::brewer.pal(n_cases(events1), "Paired"))))
 video1r
+
+video1q
+videoName = video1r
+knitrOptions1 = knitr::opts_knit$set(progress = TRUE, verbose = TRUE, animation.hook = 'gifski')
+htmlwidgets::saveWidget(widget= videoName, file='E:/PMO/v1r.html', title='Process Mining Video : Student Learning', libdir ='E:/PMO/libdep', selfcontained = T)
+?saveWidget
+
+
+#graphs
+e1p1 <- events1 %>%  filter_activity_frequency(percentage = 1.0) %>%  filter_trace_frequency(percentage = .80) %>%  precedence_matrix() %>% plot()
+e1p1
+jpeg("E:/PMO/PM/e1p1.png", width = 800, height = 500)
+e1p1
+dev.off()
+
+
+#render=F
+pm <- events1 %>% processmapR::process_map(sec=frequency('relative'), rankdir='TB')
+processmapR::g
+e1pm2r <- events1 %>% processmapR::process_map(sec=frequency('relative'), rankdir='TB', render=F)
+e1pm2r
+
+e1pm2r %>% export_graph(file_name = 'E:/PMO/PM/elmp2.png', file_type = 'PNG')
+
+
+
+#convert videos
+#https://converterpoint.com/
+#https://handbrake.fr/rotation.php?file=HandBrake-1.3.1-x86_64-Win_GUI.exe
