@@ -71,7 +71,7 @@ ctable1 %>% group_by(status) %>% summarise(TotalCases = sum(Cases, na.rm=T), Tot
 
 #barPlot----
 gbar <- function(df, status) {
-  ggplot(df, aes(x=variable, y=value, fill=variable)) + geom_bar(stat='identity', position=position_dodge2(.7)) + facet_wrap(country ~., scale='free') + geom_text(aes(label=value, y=value), size=rel(2)) + theme(legend.position = 'top', plot.title = element_text(hjust = 0.5, color = "#666666")) + coord_flip() + labs(title=paste('gbar: ', status, ' : Status of Corona : totalCases > 10000 and India'), subtitle=NULL , caption = caption1, y='Numbers', x='Cases') + guides(fill=F)
+  ggplot(df, aes(x=variable, y=value, fill=variable)) + geom_bar(stat='identity', position=position_dodge2(.7)) + facet_wrap(country ~., scale='free') + geom_text(aes(label=value, y=value), size=rel(2)) + theme(legend.position = 'top', plot.title = element_text(hjust = 0.5, color = "#666666")) + coord_flip() + labs(title=paste('gbar: : Date- ', status, ' : Status of Corona : totalCases > 10000 and India'), subtitle=NULL , caption = caption1, y='Numbers', x='Cases') + guides(fill=F)
 }
 #top10 countries + India : Yesterday & Today -----
 gbar2  = gbar(df=ctable2Melt1, status=yesterday )
@@ -88,7 +88,7 @@ head(ctable1Melt2)
 
 #function - heatmap----
 gheat <- function(df, status) {
-  ggplot(df, aes(x=country, y=variable, fill=value)) + geom_tile(color='black') + geom_text(aes(label=value, size=value, angle=30)) + scale_fill_gradient2(low='blue', high='red') + scale_size(range=c(3,4)) +  theme(axis.text.x = element_text(angle=90, size=rel(1)), legend.position = 'top', plot.title = element_text(hjust = 0.5, color = "#666666")) + labs(title=paste('gheat- : ', status, ': Status of Corona : totalCases > 1000 and India'), subtitle=NULL , caption =caption1, x='Country', y='Cases') + guides(fill=F, size=F)
+  ggplot(df, aes(x=country, y=variable, fill=value)) + geom_tile(color='black') + geom_text(aes(label=value, size=value, angle=30)) + scale_fill_gradient2(low='blue', high='red') + scale_size(range=c(3,4)) +  theme(axis.text.x = element_text(angle=90, size=rel(1)), legend.position = 'top', plot.title = element_text(hjust = 0.5, color = "#666666")) + labs(title=paste('gheat- :  : Date- ', status, ': Status of Corona : totalCases > 1000 and India'), subtitle=NULL , caption =caption1, x='Country', y='Cases') + guides(fill=F, size=F)
 }
 
 gheat2 = gheat(df=ctable2Melt2, status=yesterday)
@@ -234,8 +234,8 @@ gTSbar1b
 #save plots-----
 #some graphs from other sheets
 #gbarIndia1, gbarIndia3
-graphsList  = list(gbarBoth1a , gbarBoth1b, gbar2, gheat2, gbar1, gheat1,gCSum1, gCSum2, gLine1, gLine2, gTSbar1b,gbarIndia1, gbarIndia3)
-#gCSum2
+graphsList  = list(gTSum3, gbarBoth1a , gbarBoth1b, gbar2, gheat2, gbar1, gheat1,gCSum1, gCSum2, gLine1, gLine2, gTSbar1b,gbarIndia1A, gbarIndia1B, gbarIndia3,gTBLine1, gTBLine2, gTBArea2)
+#gCSum2gbarIndia1A
 graphArrange <- gridExtra::marrangeGrob(graphsList, nrow=1, ncol=1, top = quote(paste("Corona Plots : page", g, "of", npages)))
 ggsave(paste0('E:/graphs/', "Corona",Sys.Date(),'-',lubridate::hour(Sys.time()) , ".pdf"), graphArrange, width=4, height=2, units="in", scale=3)
 
