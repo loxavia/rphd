@@ -119,9 +119,14 @@ video1r
 video1q
 videoName = video1r
 knitrOptions1 = knitr::opts_knit$set(progress = TRUE, verbose = TRUE, animation.hook = 'gifski')
-htmlwidgets::saveWidget(widget= videoName, file='E:/PMO/v1r.html', title='Process Mining Video : Student Learning', libdir ='E:/PMO/libdep', selfcontained = T)
-?saveWidget
 
+video = video1a
+#convert to text from object
+
+myfunc <- function(v1) {deparse(substitute(v1))}
+myfunc(video)
+(vname= myfunc(video1a))
+htmlwidgets::saveWidget(widget= video, file=paste('E:/PMO/V5/',vname,'.html',sep=''), selfcontained = T, libdir = 'E:/PMO/V5/libdir')
 
 #graphs
 e1p1 <- events1 %>%  filter_activity_frequency(percentage = 1.0) %>%  filter_trace_frequency(percentage = .80) %>%  precedence_matrix() %>% plot()

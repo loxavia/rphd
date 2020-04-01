@@ -14,10 +14,10 @@ get_flows(pm1)
 
 
 #LMS ------
-slink1 <- 'https://docs.google.com/spreadsheets/d/10yFqVzstMvVnhgUuwft6YoVGumy-d3VW-vJB2AJlr0o/edit#gid=1872143002'
+slink1 <- 'https://docs.google.com/spreadsheets/d/15DF1e54g64R42nzvTSgOZqRJrjtdpUnFIyOA-MBppWo'
 
 sheets_browse(slink1)
-sdata <- read_sheet(slink1, sheet='students')
+sdata <- read_sheet(slink1, sheet='studentTraces')
 head(sdata)
 #eventStudents <- eventlog(sdata,case_id = "case",  activity_id = "activity", activity_instance_id = "activity_instance",  lifecycle_id = "activity_instance", timestamp = "timestamp", resource_id = "resource_id")
 events1 <- bupaR::simple_eventlog(eventlog = sdata,   case_id = 'case',  activity_id = 'activity', timestamp = 'timestamp')
@@ -63,7 +63,12 @@ events1 %>% process_map(type=fa1)
 events1 %>% process_map(type=fa2)
 events1 %>% process_map(type=fr1)
 events1 %>% process_map(type=fr2)
+events1 %>% process_map(type = frequency("relative_case", color_scale = "Purples"))
 
+events1 %>% process_map(type_nodes = frequency("relative_case"), type_edges = performance(mean))
+head(events1)
+events1 %>% process_map(type = custom(attribute = "finalMarks", FUN=sum, units = "marks"))
+?custom
 #layout-----
 activities(events1)
 (dfpositions = data.frame(act=c('PPT','Quiz', 'Assignment'), x=c(10, 20, 30), y=c(10,50,100)))
@@ -96,11 +101,11 @@ x=end_activities(events1, level="resource")
 plot(x)
 
 #animate ----
-events1 %>% processanimateR::animate_process()
+events1 %>% processanimateR::animate_process(duration=20)
 events1 %>% processanimateR::animate_process(duration=10)
 events1 %>% processanimateR::animate_process(duration=10, activity_callback_select = activity_select_decoration( stroke_width = "15", stroke='red'))
 
-events1 %>% animate_process(renderer = renderer_graphviz(zoom_controls = T, svg_fit = T, svg_contain=F, zoom_initial=11), duration=10)
+events1 %>% animate_process(renderer = renderer_graphviz(zoom_controls = F, svg_fit = T, svg_contain=F, zoom_initial=11), duration=10)
 #zoom_initial ??
 events1 %>% animate_process(timeline = F, duration=10)
 events1 %>% animate_process(jitter = T, duration=10)
@@ -112,14 +117,17 @@ events1 %>% animate_process(initial_state = 'paused', duration=10, legend='color
 events1 %>% animate_process(initial_time = 2, duration=10, legend='color', initial_state = 'paused')
 
 events1 %>% animate_process(repeat_count = 2, duration=10)
+events1 %>% animate_process(renderer = renderer_graphviz(), repeat_count = 2)
 events1 %>% animate_process(repeat_delay = 2, duration=10, repeat_count = 2)
 events1 %>% animate_process(epsilon_time= 1, duration=10, repeat_count = 2)
 events1 %>% animate_process(width=0, height=0,duration=10)
-events1 %>% animate_process(width='100%', height='50%',duration=10)
+events1 %>% animate_process(width='80%', height='20%',duration=10)
 
 events1 %>% animate_process(duration=10, legend='color', mapping = token_aes(color=token_scale('red')))
 events1 %>% animate_process(duration=10, repeat_count = 2, legend='color', mapping = token_aes(color=token_scale('case', scale='ordinal', range=c('red','blue','green','orange','pink'))))
 
-e1V1 <- events1 %>% animate_process(duration=10, sec=frequency('relative'),repeat_count = 2, legend='color', mapping = token_aes(color=token_scale('case', scale='ordinal', range=c('red','blue','green','orange','pink'))))
-
-htmlwidgets::saveWidget(widget=e1V1, file='E:/PMO/VIDEOS/e1V1.html', title='Process Mining Video : Student Learning', libdir ='E:/PMO/VIDEOS/libdep', selfcontained = T)
+e1V1 <- events1 %>% animate_process(duration=20,initial_state = 'paused', renderer = renderer_graphviz(zoom_controls = F), sec=frequency('relative'), repeat_count = 2, legend='color', mapping = token_aes(color=token_scale('case', scale='ordinal', range=c('red','blue','green','orange','pink'))))
+e1V1
+n_cases(events1); n_activities(events1); n_events(events1)
+#5 Students/ Cases, 6 Activities, 30 Events
+htmlwidgets::saveWidget(widget=e1V1, file='E:/PMO/PMV/e1V1.html', title='Process Mining Video : Student Learning', libdir ='E:/PMO/PMV/libdep', selfcontained = T)

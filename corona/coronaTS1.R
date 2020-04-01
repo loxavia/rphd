@@ -43,7 +43,8 @@ ggplot(hdata2, aes(x=variable, y=value)) + geom_point(aes(size=value)) + facet_w
 # + geom_line(aes(color=Country.Region))  + geom_text(aes(label=value, y=value), size=rel(2)) 
 
 names(hsum3)
-gTSum3 <- ggplot(hsum3 %>% filter(Country.Region %in% top10ind), aes(x=weekNo, y=max)) + geom_point(aes(size=max)) + facet_wrap(Country.Region ~., scales='free') + ylim(1,NA) + theme(axis.text.x = element_text(angle=60, size=rel(.9))) + labs(title=paste('gTS :', 'Time Series Analysis Over Weeks : Confirmed Cases : Selected Countries + India ', ' : Weekly Stats'), subtitle=NULL , caption = caption1 , y='Numbers', x='Dates') + scale_size(range=c(1,3)) + geom_line(aes(color=Country.Region)) + geom_text(aes(label=max, y=max), size=rel(2), nudge_x = .5, nudge_y = .5) + scale_x_continuous() + guides(size=F, color=F)
+gTSum3 <- ggplot(hsum3 %>% filter(Country.Region %in% top10ind), aes(x=weekNo, y=max)) + geom_point(aes(size=max)) + facet_wrap(Country.Region ~., scales='free') + ylim(1,NA) + theme(axis.text.x = element_text(angle=60, size=rel(.9))) + labs(title=paste('gTS :', 'Time Series Analysis Over Weeks : Confirmed Cases : Selected Countries + India ', ' : Weekly Stats'), subtitle=NULL , caption = caption1 , y='Numbers', x='Dates') + scale_size(range=c(1,3)) + geom_line(aes(color=Country.Region)) + geom_text(aes(label=max, y=max), size=rel(2), nudge_x = .5, nudge_y = .5) + scale_x_continuous() + guides(size=F, color=F) 
+#+ geom_hline(yintercept=c(1000,5000,10000, 20000), color=c('green','yellow','orange','red'))
 gTSum3
 
 #------------

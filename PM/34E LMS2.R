@@ -167,7 +167,7 @@ events %>%   process_map(type = frequency("relative_case"))
 #The relative outgoing flows for each activity
 #relative_case frequency The relative number of cases per activity and flow
 
-events %>%   process_map(type = frequency("relative_case"), color_scale = "Purples")
+events %>% process_map(type = frequency("relative_case"), color_scale = "Purples")
 events %>%  process_map(performance(median, "days"))
 events %>%  process_map(performance(mean, "hours"))
 events %>%  process_map(type_nodes = frequency("relative_case"),    type_edges = performance(mean))

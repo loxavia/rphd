@@ -19,8 +19,14 @@ events <- bupaR::simple_eventlog(eventlog = df2, case_id = 'rollno', activity_id
 
 events %>% trace_length()
 
-#trace_explorer
-?trace_explorer
+#trace_explorer------
+?trace_coverage
+events %>% trace_coverage(append=T, level='log', append_column=T)
+events %>% trace_coverage(append=T, level='trace', append_column=T)
+events %>% trace_coverage(append=T, level='case')
+events %>% group_by(gender) %>%  trace_coverage(level='trace', append_column=T)
+
+#fullcoverage to least coverage
 events %>% trace_explorer(.abbreviate = F)
 events %>% trace_explorer(.abbreviate = F, coverage=1)
 events %>% trace_explorer(.abbreviate = F, coverage=.9)
@@ -58,3 +64,9 @@ events %>% trace_list()
 events %>% group_by(gender) %>% trace_explorer(n_traces=10, type='infrequent')
 
 group_by_activity(events) %>% trace_explorer(coverage=1)
+
+events %>% processanimateR::animate_process(duration=30)
+video2b <- animate_process(events, duration=20, mode='absolute', sec=frequency('absolute'), mapping = token_aes(color=token_scale('red'), size=token_scale(10)), repeat_count = 2, rankdir='LR', epsilon_time = 1)
+video2b
+#, initial_state = 'paused'
+htmlwidgets::saveWidget(widget= video2b, file=paste('E:/PMO/V5/','video2b','.html',sep=''), selfcontained = T, libdir = 'E:/PMO/V5/libdir')

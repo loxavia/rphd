@@ -6,36 +6,38 @@ pacman::p_load(ggplot2, dplyr, rvest, xml2, gridExtra, reshape2,wesanderson)
 indcorona <- xml2::read_html("https://www.mohfw.gov.in/")
 #table1 - today-----
 #table no changed----
-indcovid1 <- indcorona %>%  html_nodes("table") %>% .[[8]] %>%   html_table()
-head(indcovid1)
-tail(indcovid1)
-dim(indcovid1)
-tail(indcovid1,2)
-indcovid1 <- indcovid1 %>% slice(1 : 1:(n()-2))
-newcolsIndia = c('ser','state', 'Ind','For','Rec','Death')
+
+indcovid <- indcorona %>%  html_nodes("table") %>% .[[1]] %>%   html_table()
+head(indcovid)
+tail(indcovid)
+dim(indcovid)
+tail(indcovid,2)
+indcovid1 <- indcovid %>% slice(1 : 1:(n()-1))
+indcovid1
+newcolsIndia = c('ser','state', 'Confirmed','Recovered','Death')
 var = c('Indians', 'Foreign', 'recoveredAll', 'death')
+head(indcovid1)
 names(indcovid1) = newcolsIndia
 names(indcovid1)
 head(indcovid1)
 indcovid1$state = factor(indcovid1$state)
-indcovid1B <- indcovid1 %>% select(-'ser') %>% filter(!grepl('Total', state) | !grepl('# Few', state))
-indcovid1B$compileDate = Sys.Date()
-indcovid1Melt1 <- indcovid1B %>% select(-compileDate) %>% melt(id.vars='state')
+indcovid1B <- indcovid1 %>% select(-'ser') %>% filter(!grepl('India', state) | !grepl('Total', state))
+#indcovid1B$compileDate = Sys.Date()
+indcovid1Melt1 <- indcovid1B %>% melt(id.vars='state')
 head(indcovid1Melt1)
 table(indcovid1Melt1$state)
 table(indcovid1Melt1$variable)
 #indcovid1Melt1$variable = factor(indcovid1Melt1$variable, levels=c('Ind','For','Rec','Death'), labels= c('Indians', 'Foreign', 'RecoveredAll', 'Death'))
 str(indcovid1Melt1)
 indcovid1Melt1$value = as.integer(indcovid1Melt1$value)
-
-gbarIndia1A <- ggplot(indcovid1Melt1, aes(x=variable, y=value, fill=variable)) + geom_bar(stat='identity', position=position_dodge2(.7), width=.7) + facet_wrap(state ~., scale='free') + theme(legend.position = 'top',  plot.title = element_text(hjust = 0.5, color = "#666666"), axis.text.y = element_text(size=rel(.7))) + geom_text(aes(label=value, y=value), position=position_dodge2(.7), size=rel(2.5), vjust=-.1) + scale_fill_discrete(name='status', labels=var) +  labs(title=paste('gbarIndia1A:', ' Corona Status', 'My Country(India) : Free Scaling'), caption = caption2, x='State/Cases', y='Numbers') + expand_limits(y = 0) + scale_y_continuous(name = "Numbers", breaks=c(5,10,15,20,50))
+#+ scale_fill_discrete(name='status', labels=var)
+gbarIndia1A <- ggplot(indcovid1Melt1, aes(x=variable, y=value, fill=variable)) + geom_bar(stat='identity', position=position_dodge2(.7), width=.7) + facet_wrap(state ~., scale='free') + theme(axis.text.x = element_text(angle=0, size=rel(.2)), legend.position = 'top',  plot.title = element_text(hjust = 0.5, color = "#666666"), axis.text.y = element_text(size=rel(.7))) + geom_text(aes(label=value, y=value), position=position_dodge2(.7), size=rel(2.5), vjust=-.1)  +  labs(title=paste('gbarIndia1A:', ' Corona Status', 'My Country(India) : Free Scaling'), caption = caption2, x='State/Cases', y='Numbers') + expand_limits(y = 0) + scale_y_continuous(name = "Numbers", breaks=c(5,10,15,20,50))
 gbarIndia1A
 str(indcovid1Melt1)
-
+indcovid1Melt1$value = as.integer(indcovid1Melt1$value)
 gbarIndia1B <- ggplot(indcovid1Melt1, aes(x=state, y=value, fill=state)) + geom_bar(stat='identity', position=position_dodge2(.7), width=.7) + facet_grid(variable ~., scale='free') + theme(legend.position = 'top',  plot.title = element_text(hjust = 0.5, color = "#666666"),axis.text.x = element_text(angle=90, size=rel(.9)), axis.text.y = element_text(size=rel(.7))) + geom_text(aes(label=value, y=value), size=rel(2.5), nudge_y = -0.1, nudge_x = -0.1, lineheight = 0.9) + scale_fill_discrete(name='status', labels=var) +  labs(title=paste('gbarIndia1B:', ' Corona Status', 'My Country(India) : Free Scaling'), caption = caption2, x='State/Cases', y='Numbers') + expand_limits(y = 0) + scale_y_continuous(name = "Numbers", breaks=c(5,10,15,20,50)) + guides(fill=F)
 gbarIndia1B
 str(indcovid1Melt1)
-
 
 #var = c('Indians', 'Foreign', 'recoveredAll', 'death')
 variable_names <- list('Ind'='Indian', 'For'='Foreign','Rec'='Recovered','Death'='Deaths')
@@ -43,13 +45,14 @@ variable_labeller <- function(variable, value){
   return(variable_names[value])
 }
 str(indcovid1Melt1)
-gbarIndia2 <- ggplot(indcovid1Melt1, aes(x=state, y=value, fill=state)) + geom_bar(stat='identity', position=position_dodge2(.7))  + theme(legend.position = 'top',  plot.title = element_text(hjust = 0.5, color = "#666666")) + geom_text(aes(label=value, y=value), position=position_dodge2(.7), size=rel(2.5))+  labs(title=paste('gbarIndia2: ', 'Corona Status', 'My Country(India) : Free Scaling'), caption = caption2, x='State/Cases', y='Numbers') + guides(fill=F) + coord_flip() + facet_grid(. ~ variable , scale='free', labeller=variable_labeller)
+gbarIndia2 <- ggplot(indcovid1Melt1, aes(x=state, y=value, fill=state)) + geom_bar(stat='identity', position=position_dodge2(.7))  + theme(legend.position = 'top',  plot.title = element_text(hjust = 0.5, color = "#666666")) + geom_text(aes(label=value, y=value), position=position_dodge2(.7), size=rel(2.5))+  labs(title=paste('gbarIndia2: ', 'Corona Status', 'My Country(India) : Free Scaling'), caption = caption2, x='State/Cases', y='Numbers') + guides(fill=F) + coord_flip() + facet_grid(. ~ variable , scale='free')
+#+ facet_grid(. ~ variable , scale='free', labeller=variable_labeller)
 gbarIndia2 
-
 indcovid1
 gbarIndia2
 
-gbarIndia3 <- ggplot(indcovid1Melt1, aes(x=state, y=value, fill=state)) + geom_bar(stat='identity', position=position_dodge2(.7))  + theme(legend.position = 'top',  plot.title = element_text(hjust = 0.5, color = "#666666")) + geom_text(aes(label=value, y=value), position=position_dodge2(.7), size=rel(2.5))+  labs(title=paste('gbarIndia3: ', 'Corona Status', 'My Country(India) : Free Scaling'), caption =caption2, x='State/Cases', y='Numbers') + guides(fill=F) + coord_flip() + facet_grid(. ~ variable , scale='free', labeller=variable_labeller)
+gbarIndia3 <- ggplot(indcovid1Melt1, aes(x=state, y=value, fill=state)) + geom_bar(stat='identity', position=position_dodge2(.7))  + theme(legend.position = 'top',  plot.title = element_text(hjust = 0.5, color = "#666666")) + geom_text(aes(label=value, y=value), position=position_dodge2(.7), size=rel(2.5))+  labs(title=paste('gbarIndia3: ', 'Corona Status', 'My Country(India) : Free Scaling'), caption =caption2, x='State/Cases', y='Numbers') + guides(fill=F) + coord_flip() + facet_grid(. ~ variable , scale='free')
+#+ facet_grid(. ~ variable , scale='free', labeller=variable_labeller)
 gbarIndia3
 
 #all graphs -----
