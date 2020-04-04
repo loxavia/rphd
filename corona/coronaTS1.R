@@ -1,5 +1,5 @@
 #Hoppins data
-pacman::p_load(ggplot2, dplyr, rvest, xml2, gridExtra, reshape2)
+pacman::p_load(ggplot2, dplyr, rvest, xml2, gridExtra, reshape2,lubridate)
 options(scipen = T)
 
 hlink1='https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv'
@@ -23,8 +23,8 @@ hdata1Melt2 <- hdata1Melt %>% filter(!value == 0 )
 hsum1 <- hdata1Melt2 %>%  arrange(Country.Region, variable, value )
 head(hsum1)
 hsum1 %>% group_by(Country.Region) %>% top_n(1, value)
-hsum1A <- hsum1 %>% group_by(Country.Region) %>% top_n(1, value) %>% filter(variable == Sys.Date()-1)
-
+(hsum1A <- hsum1 %>% group_by(Country.Region) %>% top_n(1, value) %>% filter(variable == Sys.Date()-1))
+table(hsum1A$Country.Region)
 hsum1A %>% filter(Country.Region == 'India')
 hsum1A %>% arrange(desc(value), Country.Region) %>% top_n(10, value)
 (countries <- hsum1A %>% arrange(desc(value), Country.Region)  %>% mutate(country = as.character(Country.Region)) %>% pull(country))
@@ -57,7 +57,7 @@ head(df)
 weekNos = c(1,5,10,15)
 (WData <- hsum3 %>% filter(Country.Region %in% top10ind) %>% filter(weekNo %in% weekNos) %>% select(Country.Region, max) )
 
-gTSum3 + geom_hline(data=WData, aes(yintercept=max, color=linecolor)) 
+gTSum3 + geom_hline(data=WData, aes(yintercept=max)) 
 gTSum3
 
 #------------
@@ -70,7 +70,7 @@ hsum2 <- hsum1 %>% group_by(Country.Region, weekend = ceiling_date(variable, "we
 hsum2 %>% filter(Country.Region == 'India')
 hdata1 %>% filter(Country.Region == 'India')
 
-
+#----------------------------------------
 #other optins
 facet( x  ~ y, space='free', scales='free')
 #height / width of subplots - free, free_y, free_x
