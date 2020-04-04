@@ -37,4 +37,15 @@ g + geom_text(y = Inf, x = 4, label='firstcase')
 g + geom_text(data=case1, x=4, y=10, aes(label = paste('First Case - ', firstCase)), size=rel(2)) + coord_flip()
 + coord_flip()
 
-              
+
+#----
+#facet - geom_hline
+ggplot(UKWinners) +
+  geom_point(aes(Pcode, TE.Contr.)) +
+  geom_hline(data = dMean, aes(yintercept = MN)) +
+  facet_wrap(~ Name)
+dMean <- mtcars %>%  group_by(cyl) %>%  summarise(MN = mean(mpg))
+ggplot(mtcars) +  geom_point(aes(cyl, mpg)) +  geom_hline(data = dMean, aes(yintercept = MN)) +  facet_wrap(~ cyl)
+
+dMean <- mtcars %>%  group_by(cyl, gear) %>%  summarise(MN = mean(mpg))
+ggplot(mtcars) +  geom_point(aes(cyl, mpg)) +  geom_hline(data = dMean, aes(yintercept = MN)) +  facet_wrap(gear ~ cyl)

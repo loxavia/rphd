@@ -44,7 +44,20 @@ ggplot(hdata2, aes(x=variable, y=value)) + geom_point(aes(size=value)) + facet_w
 
 names(hsum3)
 gTSum3 <- ggplot(hsum3 %>% filter(Country.Region %in% top10ind), aes(x=weekNo, y=max)) + geom_point(aes(size=max)) + facet_wrap(Country.Region ~., scales='free') + ylim(1,NA) + theme(axis.text.x = element_text(angle=60, size=rel(.9))) + labs(title=paste('gTS :', 'Time Series Analysis Over Weeks : Confirmed Cases : Selected Countries + India ', ' : Weekly Stats'), subtitle=NULL , caption = caption1 , y='Numbers', x='Dates') + scale_size(range=c(1,3)) + geom_line(aes(color=Country.Region)) + geom_text(aes(label=max, y=max), size=rel(2), nudge_x = .5, nudge_y = .5) + scale_x_continuous() + guides(size=F, color=F) 
-#+ geom_hline(yintercept=c(1000,5000,10000, 20000), color=c('green','yellow','orange','red'))
+gTSum3
+lines = c(1000,5000,10000,50000)
+df <- expand.grid(top10ind, lines)
+names(df) = c("Country.Region", 'max')
+df$linecolor = ifelse(df$max <= 1000, 'green',(ifelse(df$max <= 5000, 'yellow',(ifelse(df$max <= 10000, 'yellow','red')))))
+df$linesize = ifelse(df$max <= 1000, 1,(ifelse(df$max <= 5000, 2,(ifelse(df$max <= 10000, 3,4)))))
+head(df)
+gTSum3 + geom_hline(data=df, aes(yintercept=max, color=linecolor, size=linesize))
+head(df)
+#method2----
+weekNos = c(1,5,10,15)
+(WData <- hsum3 %>% filter(Country.Region %in% top10ind) %>% filter(weekNo %in% weekNos) %>% select(Country.Region, max) )
+
+gTSum3 + geom_hline(data=WData, aes(yintercept=max, color=linecolor)) 
 gTSum3
 
 #------------
@@ -56,3 +69,19 @@ hsum2 <- hsum1 %>% group_by(Country.Region, weekend = ceiling_date(variable, "we
 
 hsum2 %>% filter(Country.Region == 'India')
 hdata1 %>% filter(Country.Region == 'India')
+
+
+#other optins
+facet( x  ~ y, space='free', scales='free')
+#height / width of subplots - free, free_y, free_x
+facet_wrap( ~y, dir='v')
+#contols direction of the subplots plots layout -h, v
+facet_wrap(~y, strip.position = 'right')
+#top, bottom, left, right
+facet_grid(~y, switch='x')
+theme(strip.text.x = element_text(margin=margin(0,0,0,0)))
+facet_wrap(x~y, drop=F) #all categories
+facet_grid(x ~ y, margins=T) 
+#add extra row/facet 
+facet_wrap(x ~ y, ncol=2, nrow=2) 
+facet_grid(. ~ y) #exclude row/col
