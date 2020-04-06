@@ -4,6 +4,7 @@
 link1 = 'https://query.data.world/s/vuxzmjfoaf2yeetwv4gbpgx625qi4d'
 ctableau = read.csv(link1,  header=TRUE, stringsAsFactors=FALSE)
 ctableau
+write.csv(ctableau, paste('E:/data/ctableau',Sys.Date(),'.csv', sep=''), row.names = F)
 (caption1 = paste(link1, ' : Compiled by @Dhiraj :', ' @ ', Sys.time()))
 dim(ctableau)
 names(ctableau)
@@ -14,19 +15,23 @@ colT1 = c('table_names', 'case_type', 'cases', 'diff','date', 'country_region', 
 colT2 = c('case_type', 'cases','diff', 'table_names', 'combined_key', 'admin2','fips', 'prep_flow_time', 'latest_date', 'long', 'country_region', 'date','province_state', 'lat')
 colT3 = c('table_names', 'date','case_type', 'cases','diff','country_region' ,'province_state', 'admin2', 'combined_key', 'fips', 'lat', 'long','latest_date', 'prep_flow_time' )
 colT4 = c( 'case_type', 'cases', 'diff','date', 'country_region', 'province_state', 'admin2', 'combined_key','fips',  'lat', 'long', 'prep_flow_time','table_names')
-
-
-length(colT4); length(names(ctableau))
-cbind(names(ctableau), colT4)
-names(ctableau) = colT4
+colT5 = c( 'case_type', 'cases', 'diff','date', 'country_region', 'province_state', 'admin2', 'combined_key','fips',  'lat', 'long', 'table_names', 'prep_flow_time')
+names(ctableau)
+length(colT5); length(names(ctableau))
+cbind(names(ctableau), colT5)
+names(ctableau) = colT5
 head(ctableau)
 dim(ctableau)
 ctableau1 = ctableau
 head(ctableau1$date)
-ctableau1$date = as.Date(ctableau1$date,'%m/%d/%Y')
-ctableau1$prep_flow_time = as.Date(ctableau1$prep_flow_time,'%m/%d/%Y')
 
-head(ctableau1)
+ctableau1$date = as.Date(ctableau1$date,'%m/%d/%Y')
+str(ctableau1$date)
+ctableau1$date = as.POSIXct(ctableau1$date, tz='GMT')
+
+ctableau1$prep_flow_time = as.POSIXct(ctableau1$prep_flow_time,'%m/%d/%Y', tz='GMT')
+
+
 #ctableau1$prep_flow_time = lubridate::mdy_hms(ctableau1$prep_flow_time)
 head(ctableau1)
 names(ctableau1)

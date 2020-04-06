@@ -1,8 +1,7 @@
 #Process with https://www.dataminingapps.com/2017/11/a-process-mining-tour-in-r/
 
 #libraries
-pacman::p_load(gsheet, bupaR, dplyr, edeaR, processmapR, processanimateR, DiagrammeR,lubridate, htmlwidgets, googlesheets4, tidyverse) 
-
+pacman::p_load(gsheet, bupaR, dplyr, edeaR, processmapR, processanimateR, DiagrammeR,lubridate, htmlwidgets, googlesheets4, tidyverse, reshape2) 
 patients
 dim(patients)
 head(patients,5) %>% as.data.frame()
@@ -16,11 +15,15 @@ get_flows(pm1)
 #LMS ------
 slink1 <- 'https://docs.google.com/spreadsheets/d/15DF1e54g64R42nzvTSgOZqRJrjtdpUnFIyOA-MBppWo'
 
-sheets_browse(slink1)
+#sheets_browse(slink1)
 sdata <- read_sheet(slink1, sheet='studentTraces')
 head(sdata)
+names(sdata)
+sdata2 <- sdata %>% melt(id.vars= c('rollno','gender'), variable.name ='activity', value.name='timestamp', na.rm=T)
+head(sdata2)
+str(sdata2)
 #eventStudents <- eventlog(sdata,case_id = "case",  activity_id = "activity", activity_instance_id = "activity_instance",  lifecycle_id = "activity_instance", timestamp = "timestamp", resource_id = "resource_id")
-events1 <- bupaR::simple_eventlog(eventlog = sdata,   case_id = 'case',  activity_id = 'activity', timestamp = 'timestamp')
+events1 <- bupaR::simple_eventlog(eventlog = sdata2,   case_id = 'rollno',  activity_id = 'activity', timestamp = 'timestamp')
 events1
 
 custom1 = custom(FUN=mean, attribute = 'case', color_scale='PuBu',color_edges = 'dodgerblue4')
@@ -124,9 +127,9 @@ events1 %>% animate_process(width=0, height=0,duration=10)
 events1 %>% animate_process(width='80%', height='20%',duration=10)
 
 events1 %>% animate_process(duration=10, legend='color', mapping = token_aes(color=token_scale('red')))
-events1 %>% animate_process(duration=10, repeat_count = 2, legend='color', mapping = token_aes(color=token_scale('case', scale='ordinal', range=c('red','blue','green','orange','pink'))))
+events1 %>% animate_process(duration=10, repeat_count = 2, legend='color', mapping = token_aes(color=token_scale('rollno', scale='ordinal', range=c('red','blue','green','orange','pink'))))
 
-e1V1 <- events1 %>% animate_process(duration=20,initial_state = 'paused', renderer = renderer_graphviz(zoom_controls = F), sec=frequency('relative'), repeat_count = 2, legend='color', mapping = token_aes(color=token_scale('case', scale='ordinal', range=c('red','blue','green','orange','pink'))))
+e1V1 <- events1 %>% animate_process(duration=20,initial_state = 'paused', renderer = renderer_graphviz(zoom_controls = F), sec=frequency('relative'), repeat_count = 2, legend='color', mapping = token_aes(color=token_scale('rollno', scale='ordinal', range=c('red','blue','green','orange','pink'))))
 e1V1
 n_cases(events1); n_activities(events1); n_events(events1)
 #5 Students/ Cases, 6 Activities, 30 Events
