@@ -1,6 +1,6 @@
 #corona Status
 #https://www.worldometers.info/world-population/population-by-country/
-pacman::p_load(ggplot2, dplyr, rvest, xml2, gridExtra, reshape2)
+pacman::p_load(ggplot2, dplyr, rvest, xml2, gridExtra, reshape2, lubridate)
 options(scipen = T)
 
 #rename Columns
@@ -54,7 +54,7 @@ ctable2[,1:5]
 dim(ctable2)
 #ctable2$firstCase = as.Date(ctable2$firstCase,'%b %d')
 
-ctable2 %>% summarise(TotalCases = sum(Cases, na.rm=T), TotalDeaths= sum(Deaths, na.rm=T), TotalRecovered=sum(Recovered, na.rm=T), TotalNewCases = sum(newCases, na.rm=T), TotalActiveCases = sum(activeCases, na.rm=T), Totalserious = sum(serious, na.rm=T), MeanCasePerM = mean(casePerM, na.rm=T),MeanDeathsPerM = sum(deathsPerM, na.rm=T), firstCase = first(firstCase))
+ctable2 %>% summarise(TotalCases = sum(Cases, na.rm=T), TotalDeaths= sum(Deaths, na.rm=T), TotalRecovered=sum(Recovered, na.rm=T), TotalNewCases = sum(newCases, na.rm=T), TotalActiveCases = sum(activeCases, na.rm=T), Totalserious = sum(serious, na.rm=T), MeanCasePerM = mean(casePerM, na.rm=T),MeanDeathsPerM = mean(deathsPerM, na.rm=T))
 
 #---------------
 
@@ -113,7 +113,7 @@ week(Sys.Date())
 #v1 = c('country','variable')
 #fcaseList2[, v1 ] = lapply( fcaseList2[, v1], as.character)
 
-(ctable2Melt2 <- ctable2 %>% filter(Cases > 1000 | country=='India') %>% reshape2::melt(id.var=c('country','status')))
+(ctable2Melt2 <- ctable2 %>% filter(Cases > 5000 | country=='India') %>% reshape2::melt(id.var=c('country','status')))
 head(ctable2Melt2)
 #head(fcaseList2)
 dim(ctable2Melt2)
@@ -135,16 +135,17 @@ summary(ctable2Melt2)
 ctable2Melt2 %>% group_by(country, variable)  %>% summarise(value=sum(value)) %>% dcast(country ~ variable, value.var='value') %>% arrange(desc(Cases))
 
 #ctable1------
-ctable1Melt2 <- ctable1 %>% filter(Cases > 2000 | country=='India') %>% reshape2::melt(id.var=c('country','status'))
+ctable1Melt2 <- ctable1 %>% filter(Cases > 5000 | country=='India') %>% reshape2::melt(id.var=c('country','status'))
 head(ctable2Melt2)
 head(ctable1Melt2)
-(fcaseList1 <- ctable1 %>% filter(Cases > 2000 | country=='India') %>% mutate(value = week(firstCase), variable='firstCase') %>% select(country, status, variable, value))
+#(fcaseList1 <- ctable1 %>% filter(Cases > 2000 | country=='India') %>% mutate(value = week(firstCase), variable='firstCase') %>% select(country, status, variable, value))
 #ctable1Melt2a <- ctable1Melt2 %>% bind_rows(fcaseList1) %>% select(country, status, variable, value) 
 ctable1Melt2$variable = factor(ctable1Melt2$variable, ordered=T, level=caseOrder)
+ctable1Melt2$country = forcats::fct_relevel(ctable1Melt2$country,'India',after=1)
 
 #function - heatmap----
 gheat <- function(df, status) {
-  ggplot(df, aes(x=country, y=variable, fill=value)) + geom_tile(color='black') + geom_text(aes(label=value, size=value, angle=30)) + scale_fill_gradient2(low='blue', high='red') + scale_size(range=c(3,3.5)) +  theme(axis.text.x = element_text(angle=30, size=rel(1)), legend.position = 'top', plot.title = element_text(hjust = 0.5, color = "#666666")) + labs(title=paste('gheat- :  : Date- ', status, ': Status of Corona : totalCases > 2000 and India'), subtitle=paste('First Case : WeekNos (01Jan-1st week) & in India :') , caption =caption1, x='Country', y='Cases') + guides(fill=F, size=F)
+  ggplot(df, aes(x=country, y=variable, fill=value)) + geom_tile(color='black') + geom_text(aes(label=value, size=value, angle=30)) + scale_fill_gradient2(low='blue', high='red') + scale_size(range=c(3,3.5)) +  theme(axis.text.x = element_text(angle=30, size=rel(1)), legend.position = 'top', plot.title = element_text(hjust = 0.5, color = "#666666")) + labs(title=paste('gheat- :  : Date- ', status, ': Status of Corona : totalCases > 5000 and India'), subtitle=paste('First Case : WeekNos (01Jan-1st week) & in India :') , caption =caption1, x='Country', y='Cases') + guides(fill=F, size=F)
 }
 
 gheat2 = gheat(df=ctable1Melt2, status=yesterday)
@@ -167,10 +168,10 @@ names(both2)
 
 both1 %>% filter(variable != 'casePerM' | variable != 'deathsPerM' | variable !='firstCase') %>% group_by(status, variable) %>% summarise(total = sum(value, na.rm=T)) %>% reshape2::dcast(status ~ variable, value.var='total')
 
-gbarBoth1a <- both1 %>% filter(variable != 'casePerM'  | variable != 'deathsPerM') %>% group_by(status, variable) %>% summarise(value = sum(value, na.rm=T)) %>% ggplot(., aes(x=status, y=value, fill=factor(variable))) + geom_bar(stat='identity', position= position_dodge2(.7)) +  geom_text(aes(label=value, y=value), size=rel(3), position= position_dodge2(.7))  + theme(axis.text.x = element_text(angle=0, size=rel(1)), legend.position = 'top', plot.title = element_text(hjust = 0.5, color = "#666666")) + labs(title=paste('gbarBoth1a : Compare : Status of Corona : Total Summary'), subtitle=NULL , caption =caption1, x='Date', y='Cases', fill='Case Type') + guides(fill=guide_legend(nrow=1,byrow=TRUE)) 
+gbarBoth1a <- both1 %>% filter(variable != 'casePerM'  | variable != 'deathsPerM') %>% group_by(status, variable) %>% summarise(value = sum(value, na.rm=T)) %>% ggplot(., aes(x=status, y=value, fill=factor(variable))) + geom_bar(stat='identity', position= position_dodge2(.7)) +  geom_text(aes(label=value, y=value), size=rel(3), angle=30, position= position_dodge2(.7))  + theme(axis.text.x = element_text(angle=30, size=rel(1)), legend.position = 'top', plot.title = element_text(hjust = 0.5, color = "#666666")) + labs(title=paste('gbarBoth1a : Compare : Status of Corona : Total Summary'), subtitle=NULL , caption =caption1, x='Date', y='Cases', fill='Case Type') + guides(fill=guide_legend(nrow=1,byrow=TRUE)) 
 gbarBoth1a
 both1
-gbarBoth1b <- both1 %>% filter(variable != 'casePerM') %>% group_by(status, variable) %>% summarise(value = sum(value, na.rm=T)) %>% ggplot(., aes(x=variable, y=value, fill=factor(status))) + geom_bar(stat='identity', position= position_dodge2(.7)) +  geom_text(aes(label=value, y=value), size=rel(3), position= position_dodge2(.7))  + theme(axis.text.x = element_text(angle=0, size=rel(1)), legend.position = 'top', plot.title = element_text(hjust = 0.5, color = "#666666")) + labs(title=paste('gbarBoth1b : Compare : Status of Corona : Total Summary'), subtitle=NULL , caption =caption1, x='Date', y='Cases', fill='Dates') + guides(fill=guide_legend(nrow=1,byrow=TRUE)) 
+gbarBoth1b <- both1 %>% filter(variable != 'casePerM') %>% group_by(status, variable) %>% summarise(value = sum(value, na.rm=T)) %>% ggplot(., aes(x=variable, y=value, fill=factor(status))) + geom_bar(stat='identity', position= position_dodge2(.7)) +  geom_text(aes(label=value, y=value), size=rel(3), angle=30, position = position_dodge2(.7))  + theme(axis.text.x = element_text(angle=0, size=rel(1)), legend.position = 'top', plot.title = element_text(hjust = 0.5, color = "#666666")) + labs(title=paste('gbarBoth1b : Compare : Status of Corona : Total Summary'), subtitle=NULL , caption =caption1, x='Date', y='Cases', fill='Dates') + guides(fill=guide_legend(nrow=1,byrow=TRUE)) 
 gbarBoth1b
 
 (both2Sum2 <- both2 %>% select(-country) %>% group_by(status) %>% summarise_all(sum, na.rm=T) )
@@ -216,6 +217,10 @@ gCSum1
 summary2
 gCSum2 <- summary2 %>% filter(country %in% countries) %>% melt(id.var=c('status','country')) %>% ggplot(., aes(x=status, y=value, fill=variable)) + geom_bar(stat='identity', position=position_stack()) + facet_wrap(. ~ country, scales='free') + ggrepel::geom_text_repel(aes(label=value, y=value), position = position_stack(), size=2) + theme(axis.text.x = element_text(angle=30, size=rel(.8)),legend.position = 'top', plot.title = element_text(hjust = 0.5, color = "#666666")) + labs(title=paste('gCSum2 :', today, ' & ', yesterday, ' : Status of Corona : Top countries + India : Free Scale'), caption = caption1, y='Numbers', x='Dates') + guides(fill=guide_legend(nrow=1,byrow=TRUE))
 gCSum2
+
+gCSum3 <- summary2 %>% filter(country %in% countries) %>% melt(id.var=c('status','country')) %>% ggplot(., aes(x=status, y=value, fill=variable)) + geom_bar(stat='identity', position=position_dodge2(.6)) + facet_wrap(. ~ country, scales='free') + ggrepel::geom_text_repel(aes(label=value, y=value), position = position_dodge2(.7), size=2) + theme(axis.text.x = element_text(angle=0, size=rel(.8)),legend.position = 'top', plot.title = element_text(hjust = 0.5, color = "#666666")) + labs(title=paste('gCSum2 :', today, ' & ', yesterday, ' : Status of Corona : Top countries + India : Free Scale'), caption = caption1, y='Numbers', x='Dates') + guides(fill=guide_legend(nrow=1,byrow=TRUE))
+gCSum3
+
 
 both2
 

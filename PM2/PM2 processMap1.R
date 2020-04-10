@@ -30,7 +30,8 @@ custom1 = custom(FUN=mean, attribute = 'case', color_scale='PuBu',color_edges = 
 #custom2 = custom(FUN=sum, attribute = 'marks', units='Rs', color_scale='PuRd',color_edges = 'limegreen') #not working
 
 #darkorange2
-events1 %>% process_map()
+
+events1 %>% process_map
 events1 %>% process_map(custom = custom1)
 events1 %>% process_map(custom = custom1, type=frequency('relative'))
 
