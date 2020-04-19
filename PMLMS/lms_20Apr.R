@@ -2,7 +2,7 @@
 pacman::p_load(dplyr, googlesheets4, ggplot2, bupaR, edeaR, lubridate, processmapR, processanimateR)
 folder = 'E:/data/LMSDU/'
 list.files(folder)
-(filePath = paste0(folder,'logs_CxAPPG_20200415-1510.csv'))
+(filePath = paste0(folder,'logs_CxAPPG_20200419-2043.csv'))
 lmsData = read.csv(filePath, stringsAsFactors = F)
 courseName = 'Python Analytics in Moodle LMS'
 #Summarise Data-----
@@ -37,26 +37,22 @@ str(lmsData2B)
 lmsData2B$time = as.POSIXct(lmsData2B$time,format='%d/%m/%y, %H:%M')
 range(lmsData2B$time)
 
-table(lmsData2B$eventContext)
-table(lmsData2B$eventName)
+table(lmsData2B$eventContext) #activity Type + Activity Name
+table(lmsData2B$eventName) #lifecycle
+table(lmsData2B$component)  #resource
+
+lmsData2C <- lmsData2B %>% tidyr::separate(col='eventContext', into = c('activityType','activity'), sep = ':', remove=T)
+head(lmsData2C)
 
 #count of Events----
-lmsData2B %>% group_by(eventName) %>% summarise(n=n()) %>% ggplot(., aes(x='', y=n, fill=eventName)) + geom_bar(stat='identity')+ guides(fill=F) + labs(title='Event Names and their Count', subtitle = paste(courseName,' Total Events- ', nrow(lmsData2B))) + geom_text(aes(label=n, y=n), position = position_dodge2(.7)) + theme(strip.text.x=element_text(size=rel(.8)))  + facet_wrap( labeller = labeller(user = label_wrap_gen(20)), ~ reorder(eventName, -n)) 
+lmsData2C %>% group_by(eventName) %>% summarise(n=n()) %>% ggplot(., aes(x='', y=n, fill=eventName)) + geom_bar(stat='identity')+ guides(fill=F) + labs(title='Event Names and their Count', subtitle = paste(courseName,' Total Events- ', nrow(lmsData2B))) + geom_text(aes(label=n, y=n), position = position_dodge2(.7)) + theme(strip.text.x=element_text(size=rel(.8)))  + facet_wrap( labeller = labeller(user = label_wrap_gen(20)), ~ reorder(eventName, -n)) 
 
-#count of Event Context-----
-lmsData2B %>% group_by(eventContext) %>% summarise(n=n()) %>% ggplot(., aes(x='', y=n, fill=eventContext)) + geom_bar(stat='identity')+ guides(fill=F) + labs(title='Event Context and their Count', subtitle = paste(courseName,' Total Events ', nrow(lmsData2B))) + geom_text(aes(label=n, y=n), position = position_dodge2(.7)) + theme(strip.text.x=element_text(size=rel(.8)))  + facet_wrap( labeller = labeller(user = label_wrap_gen(20)), ~ reorder(eventContext, -n)) 
+#count of Activity Type-----
+lmsData2C %>% group_by(activityType) %>% summarise(n=n()) %>% ggplot(., aes(x='', y=n, fill=activityType)) + geom_bar(stat='identity')+ guides(fill=F) + labs(title='Activity Type and their Count', subtitle = paste(courseName,' Total Events - ', nrow(lmsData2B))) + geom_text(aes(label=n, y=n), position = position_dodge2(.7)) + theme(strip.text.x=element_text(size=rel(.8)))  + facet_wrap( labeller = labeller(user = label_wrap_gen(20)), ~ reorder(activityType, -n)) 
 
+names(lmsData2C)
 #event Name & context---
-lmsData2B %>% group_by(eventName, eventContext) %>% summarise(n=n()) %>% ggplot(., aes(x=eventName, y=eventContext, fill=n)) + geom_tile(color='black') + scale_fill_gradient2(low='blue',high='green') + labs(title='Event Name & Context and their Count', subtitle = paste(courseName,' Total Events ', nrow(lmsData2B))) + geom_text(aes(label=n), size=rel(2)) + theme(axis.text.x=element_text(angle=90, size=rel(.9)), axis.text.y=element_text(angle=0, size=rel(.9))) + scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 20)) + scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 40))
-
-#long names--need to use small names for EventContext---
-#make as list of activity-shortname-type-topic
-glink1= "https://docs.google.com/spreadsheets/d/15DF1e54g64R42nzvTSgOZqRJrjtdpUnFIyOA-MBppWo/edit#gid=1052786815"
-moodleActivities <- googlesheets4::read_sheet(glink1, sheet='pyAnalytics')
-head(moodleActivities)
-
-unique(lmsData2B$eventContext) %in% moodleActivities$moodleActivity
-#+ scale_y_discrete(labels = abbreviate) 
+lmsData2C %>% group_by(activityType, activity) %>% summarise(n=n()) %>% ggplot(., aes(x=activityType, y=activity, fill=n)) + geom_tile(color='black') + scale_fill_gradient2(low='blue',high='green') + labs(title='Activity Type & Name and their Count', subtitle = paste(courseName,' Total Events- ', nrow(lmsData2B))) + geom_text(aes(label=n), size=rel(2)) + theme(axis.text.x=element_text(angle=90, size=rel(.9)), axis.text.y=element_text(angle=0, size=rel(.9))) + scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 20)) + scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 40))
 
 #simplify the names of eventContext----
 grep('Course', lmsData2B$eventContext, ignore.case = T)
@@ -76,61 +72,117 @@ ff = function(x, patterns, replacements = patterns, fill = NA, ...)
     return(ans)
 }
 
-table(lmsData2B$eventContext)
-lmsData2C <- lmsData2B %>% tidyr::separate(col=eventContext, into=c('activityType','actName'), sep=':', remove=F) %>% mutate(actName = gsub('"', '', actName))
-#remove "" from actName
 #--------------------
-#pattern1 = c('Course:','Assignment:','Page:|PPT','Checklist:','Questionnaire:','Feedback:','Quiz:','URL:','Glossary:','Forum:','Folder:','Attendance:')
-#replacement1 = c("Course",'Assignment','PPT','Checklist','Survey','Survey','Quiz','URL','Glossary','Forum','Folder','Attendance')
-#cbind(pattern1, replacement1)
-#lmsData2$context2 <- ff(lmsData2$eventContext, patterns=pattern1, replacements=replacement1, fill = 'OtherContext', ignore.case = TRUE)
+#have standard Names for activity Types
+table(lmsData2C$activityType)
+pattern1 = c('Course','Assignment','Page|PPT','Checklist','Questionnaire','Feedback','Quiz','URL','Glossary','Forum','Folder','Attendance', 'FlashCard| Quiz Venture| Crossword|Student Quiz')
+replacement1 = c("Course",'Assignment','PPT','Checklist','Survey','Survey','Quiz','URL','Glossary','Forum','Folder','Attendance','Games')
+cbind(pattern1, replacement1)
+lmsData2C$activityType2 <- ff(lmsData2C$activityType, patterns=pattern1, replacements=replacement1, fill = 'OtherTypes', ignore.case = TRUE)
+lmsData2C %>% filter(activityType2 == 'OtherTypes') %>% select(activityType)
+#above should be nil
+dim(lmsData2C)
 #----------------------
 
 table(lmsData2C$activityType)
-lmsData2C %>% group_by(activityType) %>% summarise(n=n()) %>% ggplot(., aes(x='', y=n, fill=activityType)) + geom_bar(stat='identity') + guides(fill=F) + labs(title='Activty Type and their event Count', subtitle = paste(courseName,' Total Events ', nrow(lmsData2C))) + geom_text(aes(label=n, y=n), position = position_dodge2(.7)) + theme(strip.text.x=element_text(size=rel(.8)))  + facet_wrap( labeller = labeller(user = label_wrap_gen(20)), ~reorder(activityType,-n))
+lmsData2C %>% group_by(activityType2) %>% summarise(n=n()) %>% ggplot(., aes(x='', y=n, fill=activityType2)) + geom_bar(stat='identity') + guides(fill=F) + labs(title='Activty Type and their event Count', subtitle = paste(courseName,' Total Events ', nrow(lmsData2C))) + geom_text(aes(label=n, y=n), position = position_dodge2(.7)) + theme(strip.text.x=element_text(size=rel(.8)))  + facet_wrap( labeller = labeller(user = label_wrap_gen(20)), ~reorder(activityType2,-n))
 
 gsub('" ', '', lmsData2C$actName)
-lmsData2C %>% group_by(activityType, actName) %>% summarise(n=n()) %>% ggplot(., aes(x=activityType, y=actName, fill=n)) + geom_tile(color='black') + scale_fill_gradient2(low='blue',high='green') + labs(title='Activity Type & Name and their Count', subtitle = paste(courseName,' Total Events ', nrow(lmsData2C))) + geom_text(aes(label=n), size=rel(2)) + theme(axis.text.x=element_text(angle=90, size=rel(.9)), axis.text.y=element_text(angle=0, size=rel(.9))) + scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 20)) + scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 40))
+lmsData2C %>% group_by(activityType, activity) %>% summarise(n=n()) %>% ggplot(., aes(x=activityType, y=activity, fill=n)) + geom_tile(color='black') + scale_fill_gradient2(low='blue',high='green') + labs(title='Activity Type & Name and their Count', subtitle = paste(courseName,' Total Events ', nrow(lmsData2C))) + geom_text(aes(label=n), size=rel(2)) + theme(axis.text.x=element_text(angle=90, size=rel(.9)), axis.text.y=element_text(angle=0, size=rel(.9))) + scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 20)) + scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 40))
 
 #-----------
 table(lmsData2C$eventName)
-pattern2 = c('submitted','uploaded','resume','taken','Viewed','reviewed','submitted','saved','shown','updated','created','ended', 'graded','up','downloaded')
-replacement2 = c('Submitted','Uploaded','Resumed','Taken','Viewed','Reviewed','Submitted','Saved','Shown','Updated','Created','Ended', 'Graded','Up','downloaded')
+pattern2 = c('submitted','uploaded','resume','taken','Viewed','reviewed','submitted','saved','shown','updated','created','ended', 'graded','up','downloaded', 'started')
+replacement2 = c('Submitted','Uploaded','Resumed','Taken','Viewed','Reviewed','Submitted','Saved','Shown','Updated','Created','Ended', 'Graded','Up','downloaded','Started')
 cbind(pattern2, replacement2)
-lmsData2C$eventAction <- ff(lmsData2C$eventName, patterns=pattern2, replacements=replacement2, fill = 'OtherEvent', ignore.case = TRUE)
+lmsData2C$eventAction <- ff(lmsData2C$eventName, patterns=pattern2, replacements=replacement2, fill = 'OtherAction', ignore.case = TRUE)
 
 table(lmsData2C$eventAction)
+lmsData2C %>% filter(eventAction == 'OtherAction')  #nil is required
 
 lmsData2C %>% group_by(activityType, eventAction) %>% summarise(n=n()) %>% ggplot(., aes(x=activityType, y=eventAction, fill=n)) + geom_tile(color='black') + scale_fill_gradient2(low='blue',high='green') + labs(title='Activity Type & Action and their Count', subtitle = paste(courseName,' Total Events ', nrow(lmsData2C))) + geom_text(aes(label=n), size=rel(2)) + theme(axis.text.x=element_text(angle=90, size=rel(.9)), axis.text.y=element_text(angle=0, size=rel(.9))) + scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 20)) + scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 40))
 
-lmsData2C %>% group_by(activityType, actName, eventAction) %>% summarise(n=n()) %>% ggplot(., aes(x=activityType, y=actName, fill=n)) + geom_tile(color='black') + scale_fill_gradient2(low='blue',high='green') + labs(title='Event Type & Name and their Count', subtitle = paste(courseName,' Total Events ', nrow(lmsData2C))) + geom_text(aes(label=n), size=rel(2)) + theme(strip.text.x=element_text(size=rel(.8), angle=90), axis.text.x=element_text(angle=90, size=rel(.9)), axis.text.y=element_text(angle=0, size=rel(.9))) + scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 20)) + scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 40)) + facet_grid( . ~ eventAction, scales='free', space='free')
+lmsData2C %>% group_by(activityType, activity, eventAction) %>% summarise(n=n()) %>% ggplot(., aes(x=activityType, y=activity, fill=n)) + geom_tile(color='black') + scale_fill_gradient2(low='blue',high='green') + labs(title='Activity Type & Name and Action : Count', subtitle = paste(courseName,' Total Events ', nrow(lmsData2C))) + geom_text(aes(label=n), size=rel(2)) + theme(strip.text.x=element_text(size=rel(.8), angle=90), axis.text.x=element_text(angle=90, size=rel(.9)), axis.text.y=element_text(angle=0, size=rel(.9))) + scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 20)) + scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 40)) + facet_grid( . ~ eventAction, scales='free', space='free')
 
 names(lmsData2C)
-lmsData2C %>% group_by(activityType, user, eventAction) %>% summarise(n=n()) %>% ggplot(., aes(x=activityType, y=user, fill=n)) + geom_tile(color='black') + scale_fill_gradient2(low='blue',high='green') + labs(title=paste0('Activity Type & Name and their Count ', courseName,' Total Events ', nrow(lmsData2C))) + geom_text(aes(label=n), size=rel(2)) + theme(strip.text.x=element_text(size=rel(.8), angle=90), axis.text.x=element_text(angle=90, size=rel(.9), hjust=1, vjust=0), axis.text.y=element_text(angle=0, size=rel(.9))) + scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 20)) + scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 40)) + facet_grid( . ~ eventAction, scales='free', space='free')
+lmsData2C %>% group_by(activityType, user, eventAction) %>% summarise(n=n()) %>% ggplot(., aes(x=activityType, y=user, fill=n)) + geom_tile(color='black') + scale_fill_gradient2(low='blue',high='green') + labs(title=paste0('Activity Type & Name and their Count; ', courseName,'; Total Events ', nrow(lmsData2C))) + geom_text(aes(label=n), size=rel(2)) + theme(strip.text.x=element_text(size=rel(.8), angle=90), axis.text.x=element_text(angle=90, size=rel(.9), hjust=1, vjust=0), axis.text.y=element_text(angle=0, size=rel(.9))) + scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 20)) + scale_y_discrete(labels = function(x) stringr::str_wrap(x, width = 40)) + facet_grid( . ~ eventAction, scales='free', space='free')
 
 #users grades---
-#download who is doing well
+#Activity Completion
+list.files(folder)
+(filePath = paste0(folder,'progresscxappg.csv'))
+actComp1 = read.csv(filePath, stringsAsFactors = F, skip=0)
+dim(actComp1)
+head(actComp1)
+summary(actComp1)
+actComp1 <- actComp1 %>% select (!starts_with('X')) %>% select(-Email.address)
+actComp1 <- actComp1 %>% janitor::clean_names(case='all_caps')
 
+summary(actComp1)
+names(actComp1)
+str(actComp1)
+actComp2 <- janitor::remove_empty(actComp1, which = "cols")
+summary(actComp2)
+actComp2 %>% select(ASSIGNMENT_TWITTER) %>% head()
+as.POSIXct(actComp2$ASSIGNMENT_TWITTER, '%A, %d %B %Y, %I:%M %p', tz='UTC')
+names(actComp2)
+actComp2[ , -1] <- lapply(actComp2[ , -1],as.POSIXct, format='%A, %d %B %Y, %I:%M %p', tz='UTC')
+str(actComp2)
+
+#grades
+#http://learninganalytics.in/grade/export/xls/index.php?id=27
+#http://learninganalytics.in/grade/export/txt/index.php?id=27
+#replace - & (Real) with blank
+list.files(folder)
+(filePath = paste0(folder,'CxAPPG Grades-20200419_1423-comma_separated.csv'))
+grades = read.csv(filePath)
+dim(grades)
+names(grades)
+grades2 <- grades %>% select(-starts_with('Last')) %>% select(-c(Email.address, ID.number, Institution, Department)) %>% unite(col='user', c(First.name, Surname), sep=' ') %>% janitor::clean_names(case='all_caps')
+head(grades2)
+names(grades2)
+str(grades2)
+grades2[,-1] <- lapply(grades2[,-1], as.numeric)
+grades2 %>% group_by(USER) %>% rowSums(na.rm=T)
+grades2B <- grades2 %>% mutate(totalGrade = select(., 2:18) %>% apply(1, sum, na.rm=TRUE))
+grades2C <- grades2B[,c("USER",'totalGrade')]
+head(grades2C)
+
+grades2C %>% select(USER)
+unique(lmsData3B$user) %in%  unique(grades2C$USER)
+#students who have done well so far---
+(topUsers <- grades2C %>% top_frac(.2, totalGrade) %>% pull(USER))
+
+#data ready for further processing----
+#Students who have completed activity
+#Top 20% students names
+#Logs formatted for PM
+
+
+#Summarise Data-----
 #------------
 table(lmsData2C$component)
 names(lmsData2C)
 head(lmsData2C)
-lmsData3 <- lmsData2C %>% select(time, user, activityType, actName, component, eventAction)
+lmsData3 <- lmsData2C %>% select(time, user, activityType, activity, component, eventName, activityType2, eventAction)
 head(lmsData3)
+table(lmsData3$user) #case
+table(lmsData3$time) #timestamp
+table(lmsData3$activity) #activity - Names
+table(lmsData3$eventName) #activity Descp
+table(lmsData3$activityType) #activity Type
+table(lmsData3$component) #resource
+table(lmsData3$eventAction)  #lifecycle
 
-lmsData3 %>% slice(grep('Questionnaire', activityType, ignore.case = T)) %>% select(actName)
-table(lmsData3$activityType)
-table(lmsData3$component)
-names(lmsData3)
 lmsData3 %>% filter(component == 'System')  %>% select(activityType)
 lmsData3 %>% filter(activityType == 'Course')  %>% select(activityType)
 lmsData3 %>% filter(component == 'System')  %>% select(activityType)
-lmsData3 %>% filter(component == 'System')  %>% group_by(activityType, actName, eventAction) %>% summarise(n=n())
+lmsData3 %>% filter(component == 'System')  %>% group_by(activity, activityType, eventAction) %>% summarise(n=n())
 
 lmsData3 %>% group_by(activityType, component, eventAction) %>% summarise(n=n()) %>% as.data.frame()
 #course Types do not have useful work
 
-lmsData3B <- lmsData3 %>% rename(activity = actName, resource=component, lifecycle = eventAction, timestamp=time) %>% filter( activityType != 'Course')
+lmsData3B <- lmsData3 %>% rename(activity = activity, resource=component, lifecycle = eventAction, timestamp=time) %>% filter( activityType != 'Course')
 head(lmsData3B)
 
 #create event object
@@ -141,18 +193,26 @@ events1 <- simple_eventlog(eventlog = lmsData3B, case_id = 'user', activity_id =
 events1
 
 #summary------
-events1 %>% summary()
-events1 %>% n_activities()
-events1 %>% activities()
-events1 %>% cases()  #start and end time of each case with trace, length, activities participated
-events1 %>% resources()  # no resources...
-
+events1 %>%  summary()
+events1 %>%  process_map()
+events1 %>%  n_activities()
+events1 %>%  activities()
+events1 %>%  cases()  #start and end time of each case with trace, length, activities participated
+events1 %>%  resources()  # no resources...
+events1 %>%  filter_case(cases = topUsers) %>% trace_explorer(raw_data = T, coverage=1)
+events1 %>% activity_presence() %>% plot
 #trace-----
 events1 %>% trace_explorer(coverage=1)
 events1 %>% trace_coverage(level = 'trace') 
 events1 %>% trace_explorer(n_traces=3, type='frequent') #3 frequent first
 events1 %>% trace_explorer(n_traces=3, show_labels = F)
 events1 %>% trace_explorer(n_traces=3, show_labels = F, raw_data = T)
+table(events1$activityType)
+events1 %>% filter(activityType %in% c('Assignment', 'Quiz')) %>% filter_case(case = topUsers) %>% animate_process(legend='color', repeat_count = 1, mode='absolute', duration=30, sec=frequency('relative'), mapping = token_aes( color = token_scale("user", scale = "ordinal",range = RColorBrewer::brewer.pal(7, "Paired"))))
+names(events1)
+table(events1$activityType, events1$lifecycle)
+events1 %>% filter(activityType %in% c('Assignment', 'Quiz') ) %>% filter(lifecycle %in% c('Submitted','Started','Created','Uploaded')) %>% filter_case(case = topUsers) %>% animate_process(duration=20)
+
 
 
 #create a new event type with resources ------
