@@ -22,7 +22,7 @@ data <- eventlog_from_xes()
 ?events_to_activitylog
 
 names(df1)
-event1 <- events_to_activitylog(df1, case_id = 'case', activity_id = 'activity', activity_instance_id = 'activity', lifecycle_id = 'activity' , timestamp = nrow(df1), resource_id = 'activity')
+event1 <- events_to_activitylog(df1, case_id = 'case', activity_id = 'activity', activity_instance_id = 'activity', lifecycle_id = 'activity' , timestamp = , resource_id = 'activity')
 
 
 #http://ceur-ws.org/Vol-1527/paper18.pdf

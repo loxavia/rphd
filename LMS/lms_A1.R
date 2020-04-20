@@ -2,15 +2,17 @@
 
 pacman::p_load(dplyr, ggplot2, ggplot2,tidyverse,magrittr, lubridate,wordcloud2, bupaR, processanimateR)
 
-#from Adminer, export data from mdl_logstore_standard_log
-#into csv - gzip format
+#from Adminer, export data from mdl_logstore_standard_log #into csv - gzip format
 #data 
-zz=gzfile('E:/LMS/mdl_logstore_standard_log.csv.gz','rt')  
+folder = 'E:/data/LMSDU'
+list.files(folder)
+
+zz=gzfile('E:/data/LMSAU/mdl_logstore_standard_log.csv.gz','rt')  
 df=read.csv(zz,header=T)
 summary(df)
 data=df
-names(df)
-names(df)[1] = 'id'
+names(data)
+names(data)[1] = 'id'
 head(data)
 dim(data)
 names(data)
@@ -46,7 +48,8 @@ paste(as.character(range(data$timecreated)))
 #duration <- paste(duration, paste(as.character(range(data$timecreated))))
 (dur1 = paste(as.character(min(as.Date(data$timecreated))), as.character(max(as.Date(data$timecreated))), sep=' to '))
 
-gLMS2 <- data %>% mutate(timecreated = as.Date(timecreated)) %>% group_by(month=floor_date(timecreated, "month")) %>% summarize(count =n())  %>% ggplot(., aes(x = month, y = count)) +  geom_line(color = "#00AFBB", size = 2) + scale_x_date(date_breaks = '1 month', date_labels = "%b/%y") + theme(axis.text.x = element_text(angle = 30)) + labs(title='Number of Events : Month Wise', subtitle = paste('Duration', dur1), caption='Developed by Dhiraj Upadhyaya') + theme(plot.title = element_text(hjust = 0.5))
+data %>% mutate(timecreated = as.Date(timecreated)) %>% group_by(month=floor_date(as.Date(timecreated), "month")) %>% tally()
+gLMS2 <- data %>% mutate(timecreated = as.Date(timecreated)) %>% group_by(month=floor_date(as.Date(timecreated), "month")) %>% tally()  %>% ggplot(., aes(x = month, y = n)) +  geom_line(color = "#00AFBB", size = 2) + scale_x_date(date_breaks = '1 month', date_labels = "%b/%y") + theme(axis.text.x = element_text(angle = 30)) + labs(title='Number of Events : Month Wise', subtitle = paste('Duration', dur1), caption='Developed by Dhiraj Upadhyaya') + theme(plot.title = element_text(hjust = 0.5))
 gLMS2
 
 #context level-----
