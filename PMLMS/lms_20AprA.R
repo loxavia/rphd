@@ -164,7 +164,10 @@ unique(lmsData3B$user) %in%  unique(grades2C$USER)
 table(lmsData2C$component)
 names(lmsData2C)
 head(lmsData2C)
+
+#lmsData3-------
 lmsData3 <- lmsData2C %>% select(time, user, activityType, activity, component, eventName, activityType2, eventAction)
+
 head(lmsData3)
 table(lmsData3$user) #case
 table(lmsData3$time) #timestamp
@@ -182,6 +185,7 @@ lmsData3 %>% filter(component == 'System')  %>% group_by(activity, activityType,
 lmsData3 %>% group_by(activityType, component, eventAction) %>% summarise(n=n()) %>% as.data.frame()
 #course Types do not have useful work
 
+#lmsData3B-----
 lmsData3B <- lmsData3 %>% rename(activity = activity, resource=component, lifecycle = eventAction, timestamp=time) %>% filter( activityType != 'Course')
 head(lmsData3B)
 
@@ -197,6 +201,8 @@ events1 %>%  summary()
 events1 %>%  process_map()
 events1 %>%  n_activities()
 events1 %>%  activities()
+events1 %>%  activity_frequency (percentile=.6)
+?
 events1 %>%  cases()  #start and end time of each case with trace, length, activities participated
 events1 %>%  resources()  # no resources...
 events1 %>%  filter_case(cases = topUsers) %>% trace_explorer(raw_data = T, coverage=1)
@@ -208,6 +214,12 @@ events1 %>% trace_explorer(n_traces=3, type='frequent') #3 frequent first
 events1 %>% trace_explorer(n_traces=3, show_labels = F)
 events1 %>% trace_explorer(n_traces=3, show_labels = F, raw_data = T)
 table(events1$activityType)
+events1 %>% filter(activityType %in% c('Assignment', 'Quiz')) %>% filter_case(case = topUsers) %>% number_of_repetitions(type="all", level='log')
+events1 %>% filter(activityType %in% c('Assignment', 'Quiz')) %>% filter_case(case = topUsers) %>% number_of_repetitions(type="all", level='log')
+
+events1 %>% filter(activityType %in% c('Assignment', 'Quiz')) %>% filter_case(case = topUsers) %>% number_of_selfloops(append = T)
+events1 %>% number_of_selfloops(level="case") %>% ggplot() +  geom_histogram(aes(absolute), bins=5)
+
 events1 %>% filter(activityType %in% c('Assignment', 'Quiz')) %>% filter_case(case = topUsers) %>% animate_process(legend='color', repeat_count = 1, mode='absolute', duration=30, sec=frequency('relative'), mapping = token_aes( color = token_scale("user", scale = "ordinal",range = RColorBrewer::brewer.pal(7, "Paired"))))
 names(events1)
 table(events1$activityType, events1$lifecycle)
@@ -283,7 +295,7 @@ events2 %>% trace_coverage(level = "case",append = TRUE, append_column = "relati
 
 
 events2Time <- events2 %>% group_by(user, activity) %>% summarise(start=last(timestamp), end =first(timestamp)) %>% mutate(durActivity = difftime(end, start, units='mins')) %>% arrange(-durActivity) %>% select(c(user, activity, start, end, durActivity)) 
-events2Time[1:5, c(3,4,5)]
+events2Time[1:5, c(1,2,3,4,5)]
 
 events2 %>% trace_explorer()
 events2 %>% resource_matrix() 

@@ -103,19 +103,19 @@ events %>% trace_coverage(level = "case", append_column = "relative")
 #http://www.bupar.net/enriching.html
 events$eventContext
 #student who accesses Attendance Module
-events %>%  group_by_case %>%   mutate(Attnd = any(eventContext == "Attendance: Online Attendance")) %>%   ungroup_eventlog()
+events %>% group_by_case %>% mutate(Attnd = any(eventContext == "Attendance: Online Attendance")) %>% ungroup_eventlog()
 
 #whether a case followed a frequent or infrequent path. 
 events %>% trace_coverage(level = "case", append = T, append_column = "relative") %>%mutate(frequent = relative_case_trace_coverage > 0.2) %>% filter(frequent=="FALSE") %>% select(user, frequent)
 
 names(events)
 #manipulation
-events %>% group_by(eventContext) %>%   n_cases()
+events %>% group_by(eventContext) %>% n_cases()
 events %>% group_by_resource %>% n_cases()
-events %>% group_by_activity %>% n_cases()  # group by activity types
+events %>% group_by_activity %>% n_cases() # group by activity types
 events %>% group_by_activity_resource %>% n_cases() #- group by activity resource pair
 events %>% group_by_activity_instance %>% n_cases() #- group by activity instances.
-#events %>% group_by_case() %>%  mutate(CountID = dplyr::summarise(sum(activity_instance_id)))
+#events %>% group_by_case() %>% mutate(CountID = dplyr::summarise(sum(activity_instance_id)))
 events %>% filter( grepl("PPT",eventContext)) %>% process_map()
 events %>% select(user)
 names(events)
