@@ -1,5 +1,5 @@
 #LMSDU - Python
-pacman::p_load(dplyr, googlesheets4, ggplot2, bupaR, edeaR, lubridate, processmapR, processanimateR)
+pacman::p_load(dplyr, googlesheets4, ggplot2, bupaR, edeaR, reshape2, lubridate, processmapR, processanimateR)
 folder = 'E:/data/LMSDU/'
 list.files(folder)
 #(filePath = paste0(folder,'logs_CxAPPG_20200419-2043.csv')) #19Apr
@@ -135,6 +135,11 @@ as.POSIXct(actComp2$ASSIGNMENT_TWITTER, '%A, %d %B %Y, %I:%M %p', tz='UTC')
 names(actComp2)
 actComp2[ , -1] <- lapply(actComp2[ , -1],as.POSIXct, format='%A, %d %B %Y, %I:%M %p', tz='UTC')
 str(actComp2)
+names(actComp2)
+actComp2 %>% melt(id.vars='USER', na.rm=T) %>% group_by(USER, variable) %>% summarise(n=n())
+options(scipen = 99)
+actComp2 %>% melt(id.vars='USER', na.rm=T) %>% group_by(variable) %>% summarise(n=n()) %>% ggplot(., aes(x='', y=n, fill=variable)) + geom_bar(stat='identity') + facet_wrap(~ reorder(variable,-n)) + guides(fill=F) + geom_text(aes(label=n, y=n))
+
 
 #grades
 #http://learninganalytics.in/grade/export/xls/index.php?id=27
@@ -157,8 +162,10 @@ head(grades2C)
 
 grades2C %>% select(USER)
 unique(lmsData3B$user) %in%  unique(grades2C$USER)
+grades2C %>% ggplot(., aes(x='', y=totalGrade, fill=USER)) + geom_bar(stat='identity') + facet_wrap(~ reorder(USER,-totalGrade)) + guides(fill=F) + geom_text(aes(label=totalGrade, y=totalGrade))
 #students who have done well so far---
 (topUsers <- grades2C %>% top_frac(.2, totalGrade) %>% pull(USER))
+grades2C %>% top_frac(.2, totalGrade)%>% ggplot(., aes(x='', y=totalGrade, fill=USER)) + geom_bar(stat='identity') + facet_wrap(~ reorder(USER,-totalGrade)) + guides(fill=F) + geom_text(aes(label=totalGrade, y=totalGrade))
 
 #data ready for further processing----
 #Students who have completed activity
@@ -210,7 +217,7 @@ events1 %>%  n_activities()
 events1 %>%  activities()
 events1 %>%  activity_frequency (percentile=.6)
 ?
-events1 %>%  cases()  #start and end time of each case with trace, length, activities participated
+events1 %>%  n_cases()  #start and end time of each case with trace, length, activities participated
 events1 %>%  resources()  # no resources...
 events1 %>%  filter_case(cases = topUsers) %>% trace_explorer(raw_data = T, coverage=1)
 events1 %>% activity_presence() %>% plot
