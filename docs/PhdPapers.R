@@ -75,6 +75,7 @@ paperPlan
 #table6- Template for Paper ---
 paperTemplate <- mcga(assign_colnames(tables1[[6]], 1))
 paperTemplate
+paste(paperTemplate$ser, paperTemplate$subject)
 
 #papers-----
 docx_extract_tbl(papers,11, header=T)
@@ -169,3 +170,5 @@ allPapers3 %>% group_by(area) %>% summarise(n=n())
 
 allPapers3 %>% select(area, year, gaps) %>% arrange(area)
 
+
+allPapers2%>% pivot_wider(  names_from = c(subject,ser), values_from = description)
