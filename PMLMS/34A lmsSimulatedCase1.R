@@ -48,6 +48,10 @@ set.seed(12); e3 <- e2 %>% sample_frac(.8)
 events <- bupaR::simple_eventlog(eventlog = e3, case_id = 'rollno', activity_id = 'activity', timestamp = 'timestamp')
 events
 
+# Save/Read the eventobject
+#saveRDS(events, "eventsLMS.rds")
+events1 <- readRDS("eventsLMS.rds")
+
 mapping(events)
 events %>% summary()
 head(events)
@@ -73,6 +77,20 @@ events1 %>% processmapR::process_map(sec=frequency('absolute'))
 events1 %>% processmapR::process_map(sec=frequency('relative'), rankdir='TB')
 events1 %>% processmapR::process_map(sec=frequency('absolute-case'), rankdir='BT')
 events1 %>% processmapR::process_map(sec=frequency('relative-case'), rankdir='RL')
+
+#Map with Lines------
+names(events1)
+mapping(events1)
+?lined_chart
+events1 %>%  processmapR::lined_chart(x = "relative",line_width = 1 )
+
+ilined_chart(patients, plotly = FALSE)
+iplotly_lined_chart(events1)
+
+#dottedChart------
+events1 %>% processmapR::dotted_chart(x = "absolute", sort = "start", units = "secs", color = "user")
+
+
 #----
 #Animate Process-----
 video1a <- animate_process(events1, duration=20, repeat_count = 1, mode='absolute', mapping = token_aes(color=token_scale('red')))

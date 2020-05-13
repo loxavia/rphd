@@ -42,14 +42,15 @@ docx_cmnt_count(papers)
 tables1[[1]]
 
 # make table 1 better
-assign_colnames(tables1[[1]], 1)
+assign_colnames(tables1[[1]], 2)
 
 # make table 1's column names great again 
-mcga(assign_colnames(tables1[[1]], 1))
-#tables1[[1]]
+mcga(assign_colnames(tables1[[1]], 2))
+tables1[[1]]
 
 #now extract tables one by one
-#tables1
+#tables
+tables1
 
 #table1-Phd Details ---
 phdDetails <- mcga(assign_colnames(tables1[[1]], 1))
@@ -71,19 +72,13 @@ resOut
 paperPlan <- mcga(assign_colnames(tables1[[5]], 1))
 paperPlan
 
-#table6- Analytical Techniques ---
+#table6- Techniques ---
 techniques <- mcga(assign_colnames(tables1[[6]], 1))
 head(techniques)
 
-#table7- System, Applications, Tools ---
-system <- mcga(assign_colnames(tables1[[7]], 1))
-head(system)
-
-#table8- Activities, Methods ---
-#Assignment, 
+#table7- Definitions ---
 definitions <- mcga(assign_colnames(tables1[[7]], 1))
 head(definitions)
-
 
 #table8- Template for Paper ---
 paperTemplate <- mcga(assign_colnames(tables1[[8]], 1))

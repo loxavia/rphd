@@ -358,4 +358,4 @@ V2D <- events2 %>% filter_activity(activities = c('Course','Checklist','Attendan
 
 htmlwidgets::saveWidget(V2D,file='E:/PMO/PMV/V2D.html', libdir='E:/PMO/PMV/libdep', selfcontained = T)
 
-events2
+events2 %>% processanimateR::animate_process()
