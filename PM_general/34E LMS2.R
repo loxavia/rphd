@@ -1,10 +1,15 @@
 #PM - LMS data
+#actual Data - LA LMS Data - few rows
 
-link = "https://docs.google.com/spreadsheets/d/1Rv-8pDWMeonmjn7LCZh55MJtIh0XG5vHX-mIZpcGf1c/edit#gid=513508550"
-pacman::p_load(gsheet, bupaR, dplyr, edeaR, processmapR, processanimateR, DiagrammeR,lubridate) 
+pacman::p_load(gsheet, googlesheets4, ggplot2, dplyr, DiagrammeR,lubridate) 
+pacman::p_load(bupaR, edeaR, processmapR, processanimateR, processcheckR) 
+glink1 = "https://docs.google.com/spreadsheets/d/1Rv-8pDWMeonmjn7LCZh55MJtIh0XG5vHX-mIZpcGf1c"
+googlesheets4::sheets_sheets(glink1)
 
-df = as.data.frame(gsheet2tbl(link))
-data = df
+LMS3 = as.data.frame(googlesheets4::read_sheet(glink1, sheet='LMS3'))
+head(LMS3) ; dim(LMS3)
+#data summary
+data = LMS3
 names(data)
 head(df)
 data$Time #check data format
@@ -15,107 +20,84 @@ data$Time = as.POSIXct(data$Time, format='%d/%m/%y, %H:%M')
 data$Time
 str(data)
 names(data)
+#rename Columns----
 cols1 = c('time','user','affectedUser', 'eventContext', 'component', 'eventName', 'Description','orgin','ipaddress')
 names(data) = cols1
 head(data)
 data$time = as.POSIXct(data$time)
 str(data$time)
-events <- bupaR::simple_eventlog(eventlog = data, case_id = 'user', activity_id = 'eventContext', timestamp = 'time')
+#create events-----
+events1 <- bupaR::simple_eventlog(eventlog = data, case_id = 'user', activity_id = 'eventContext', timestamp = 'time')
+events1
+activity_frequency(events1)
+events1 %>% activity_frequency(level='activity')
 
-events
-activity_frequency(events)
-events %>% activity_frequency(level='activity')
-
-events %>% activity_frequency(level = "activity") %>% plot()
-events %>% process_map()
+events1 %>% activity_frequency(level = "activity") %>% plot()
+events1 %>% process_map()
 
 #how many activities
-activity_frequency(events)
+activity_frequency(events1)
 #freq of participation in activities
-events %>% activity_frequency(level='activity')
+events1 %>% activity_frequency(level='activity')
 
+processmapR::process_map(events1)
+animate_process(events1)
+AP_events1 <- animate_process(events1)
 
-processmapR::process_map(events)
-animate_process(events)
-lm2 <- animate_process(events)
+htmlwidgets::saveWidget(AP_events1,file='E:/PMO/htmlV/lmsV1.html')
+write.csv(events1,paste("E:/PMO/eventData/lms2events",Sys.Date(),".csv"), na='', row.names = F)
 
-htmlwidgets::saveWidget(lm2,file='E:/PMC/lms2.html')
-write.csv(events,"E:/PMC/lms2events.csv", row.names = F)
+#more on events
+events1 %>% activities
+#combine activity into 1----
+events1 %>% act_unite(PPT = c("Page: PPT - Analytics","Page: PPT - Data Handling")) %>% process_map() #2 ppts into 1
 
-
-#-----lms3-----
-link3 ='https://docs.google.com/spreadsheets/d/1Rv-8pDWMeonmjn7LCZh55MJtIh0XG5vHX-mIZpcGf1c/edit#gid=513508550'
-df = as.data.frame(gsheet2tbl(link3))
-df
-data = df
-names(data)
-data$Time
-textdate = "14/02/20, 13:28"
-as.POSIXct (textdate, format ='%d/%m/%y, %H:%M')
-data$Time = as.POSIXct(data$Time, format ='%d/%m/%y, %H:%M')
-data$Time
-str(data)
-names(data)
-cols1 = c('time','user','affectedUser', 'eventContext', 'component', 'eventName', 'Description','orgin','ipaddress')
-names(data) = cols1
-head(data)
-str(data$time)
-events <- bupaR::simple_eventlog(eventlog = data,   case_id = 'user',  activity_id = 'eventContext', timestamp = 'time')
-
-events
-processmapR::process_map(events)
-animate_process(events)
-
-head(events)
-m1 <- animate_process(events)
-htmlwidgets::saveWidget(m1, file = "test.html")
-?animate_process
-
-events %>% activity_presence() %>% plot
-
-animate_process(events, legend=T, mode='absolute')
-animate_process(events, legend=T, mode='relative')
-animate_process(events, legend=T, mode='relative', duration=10)
-
-
+animate_process(events1, legend=T, mode='absolute')
+animate_process(events1, legend=T, mode='relative')
+animate_process(events1, legend=T, mode='relative', duration=10)
 
 #Processmap
-process_map(events)
-process_map(events, rankdir = 'TB')
+process_map(events1)
+process_map(events1, rankdir = 'TB')
+?act_collapse
 
-events$eventName
-n_activities(events)
-activities(events)
-#ction, since we unite two or more activities. W
-events %>%  act_unite(PPT = c("Page: PPT - Analytics","Page: PPT - Data Handling")) %>%   process_map()
-?act_unite
-table(events$eventContext)
-
-events %>% act_collapse(newActivity = c('Page: PPT - Linear Regression', 'Page: PPT - Logistic Regression')) %>% process_map()
-
-
-#
-events %>% throughput_time(level = "case")
-events %>% throughput_time(level = "case",append = TRUE) %>% select(time, throughput_time_case)
-events %>% trace_coverage(level = "case") %>% pull(trace)
-events %>% trace_coverage(level = "case", append=T)
-events %>% trace_coverage(level = "case", append_column = "relative") 
+events1 %>% act_collapse(newActivity = c('Page: PPT - Linear Regression', 'Page: PPT - Logistic Regression')) %>% process_map()
+#diff between collapse and unit ??
+events1 %>% throughput_time(level = "case")
+events1 %>% throughput_time(level = "case",append = TRUE) %>% select(time, throughput_time_case)
+events1 %>% trace_coverage(level = "case") %>% pull(trace) #order in which activity was performed
+events1 %>% trace_coverage(level = "case", append=T) %>% select(user, absolute_case_trace_coverage)
+events1 %>% trace_coverage(level = "case", append_column = "relative") 
+#does every student learns in the same way
 #http://www.bupar.net/enriching.html
-events$eventContext
-#student who accesses Attendance Module
-events %>% group_by_case %>% mutate(Attnd = any(eventContext == "Attendance: Online Attendance")) %>% ungroup_eventlog()
+events1$eventContext
+#student who accesses Attendance Module - True
+events1 %>% group_by_case %>% mutate(Attnd = any(eventContext == "Attendance: Online Attendance")) %>% ungroup_eventlog() %>% select(user, Attnd) %>% group_by(Attnd)  %>% n_cases()
+#change to any to all
+events1 %>% group_by_case %>% mutate(Attnd = any(eventContext == "Attendance: Online Attendance", eventContext == "Page: PPT - Logistic Regression") ) %>% ungroup_eventlog() %>% select(user, Attnd) %>% group_by(Attnd)  %>% n_cases()
+
 
 #whether a case followed a frequent or infrequent path. 
-events %>% trace_coverage(level = "case", append = T, append_column = "relative") %>%mutate(frequent = relative_case_trace_coverage > 0.2) %>% filter(frequent=="FALSE") %>% select(user, frequent)
+events1 %>% trace_coverage(level = "case", append = T, append_column = "relative") %>% mutate(frequent = relative_case_trace_coverage > 0.9) %>% n_cases()
+n_cases(events1)
+#%>% filter(frequent=="FALSE") %>% select(user, frequent) 
+names(events1)
 
-names(events)
 #manipulation
-events %>% group_by(eventContext) %>% n_cases()
-events %>% group_by_resource %>% n_cases()
-events %>% group_by_activity %>% n_cases() # group by activity types
-events %>% group_by_activity_resource %>% n_cases() #- group by activity resource pair
-events %>% group_by_activity_instance %>% n_cases() #- group by activity instances.
-#events %>% group_by_case() %>% mutate(CountID = dplyr::summarise(sum(activity_instance_id)))
+events1 %>% group_by(eventContext) %>% n_cases()
+events1 %>% group_by_resource %>% n_cases()
+events1 %>% group_by_activity %>% n_cases() # group by activity types
+events1 %>% group_by_case %>% n_activities() 
+?group_by_resource_activity
+events1 %>% group_by_resource_activity() %>% n_cases() #- group by activity resource pair
+events1 %>% group_by_activity_instance %>% n_cases() #- group by activity instances. will be 1.
+events1 %>% group_by_resource() %>% n_cases()  #since no resource was defined
+
+events1 %>% bupaR::arrange(user)
+events1 %>% bupaR::arrange(eventName)
+events1 %>% bupaR::arrange(time, user) %>% head(5)
+events1 %>% group_by_case  %>% dplyr::summarise(count=length(unique(eventContext)))
+%>% mutate(CountID = dplyr::summarise(length(activity_instance_id)))
 events %>% filter( grepl("PPT",eventContext)) %>% process_map()
 events %>% select(user)
 names(events)
